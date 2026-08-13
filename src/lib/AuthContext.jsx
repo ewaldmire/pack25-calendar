@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
+import { DEMO_MODE } from '@/lib/demoMode';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
@@ -19,6 +20,16 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAppState = async () => {
+    if (DEMO_MODE) {
+      // No backend to talk to in demo mode — render straight through as an
+      // unauthenticated, error-free app.
+      setIsLoadingPublicSettings(false);
+      setIsLoadingAuth(false);
+      setIsAuthenticated(false);
+      setAuthChecked(true);
+      setAuthError(null);
+      return;
+    }
     try {
       setIsLoadingPublicSettings(true);
       setAuthError(null);

@@ -4,6 +4,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose
 } from "@/components/ui/dialog";
 import { base44 } from "@/api/base44Client";
+import { DEMO_MODE } from "@/lib/demoMode";
 import { Upload, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -14,6 +15,15 @@ export default function UploadEvents({ open, onOpenChange, onImported }) {
 
   const handleUpload = async () => {
     if (!file) return;
+    if (DEMO_MODE) {
+      toast({
+        title: "Not available in this demo",
+        description: "Document import needs the full Base44 backend. This static demo only shows sample data.",
+      });
+      setFile(null);
+      onOpenChange(false);
+      return;
+    }
     setBusy(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
