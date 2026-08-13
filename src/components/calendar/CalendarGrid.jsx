@@ -53,7 +53,7 @@ export default function CalendarGrid({ events, monthDate, onEventClick, onDayCli
             >
               <div className={cn(
                 "text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full",
-                isToday ? "bg-foreground text-background" : "text-muted-foreground"
+                isToday ? "bg-gold text-foreground" : "text-muted-foreground"
               )}>
                 {day}
               </div>
