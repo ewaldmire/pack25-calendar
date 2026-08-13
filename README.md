@@ -99,8 +99,22 @@ for sideloading onto a phone during local development, not a real distributable
 app: no signing, no Play Store metadata, cleartext HTTP allowed app-wide.
 
 Push to `main` with changes under `android/` (or trigger manually) to run
-`.github/workflows/android-apk.yml`, which builds a debug APK and uploads it
-as a workflow run artifact — download it from the Actions run and sideload
-(enable "install unknown apps" for whichever app you download it with).
+`.github/workflows/android-apk.yml`, which builds a debug APK, versioned by
+build datetime (so each build looks like a newer update to Android), and
+publishes it two ways:
+
+- As a workflow run artifact (manual download).
+- As the asset on a rolling GitHub **pre-release** tagged `dev` — the tag and
+  release get overwritten on every build, so there's always exactly one
+  "latest" dev build to grab.
+
+### Tracking it with [Obtainium](https://github.com/ImranR98/Obtainium)
+
+In Obtainium, "Add App" → paste this repo's URL
+(`https://github.com/ewaldmire/pack25-calendar`) → it should auto-detect the
+GitHub source. In that app's settings, turn on **"Include prereleases"** —
+the `dev` release is marked as a prerelease on purpose, so Obtainium won't
+see it otherwise. From then on, Obtainium will offer a reinstall whenever a
+new dev build lands (each one carries a newer, datetime-derived version).
 
 If your laptop's IP changes, update `server_url` and push again to rebuild.

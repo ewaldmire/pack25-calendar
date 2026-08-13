@@ -11,8 +11,11 @@ android {
         applicationId "com.pack25mahomet.cal"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        // CI sets these to a datetime-derived build number so Android (and
+        // Obtainium) can tell each dev build apart and offer it as an update.
+        // Falls back to fixed values for a plain local build.
+        versionCode (System.getenv("ANDROID_VERSION_CODE") ?: "1").toInteger()
+        versionName System.getenv("ANDROID_VERSION_NAME") ?: "1.0-dev"
     }
 
     buildTypes {
