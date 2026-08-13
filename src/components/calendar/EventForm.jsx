@@ -88,6 +88,16 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
               <Input id="end_date" type="date" value={form.end_date || ""} onChange={e => setForm({ ...form, end_date: e.target.value })} />
             </div>
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-2 min-w-0">
+              <Label htmlFor="start_time">Start Time</Label>
+              <Input id="start_time" type="time" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} />
+            </div>
+            <div className="space-y-2 min-w-0">
+              <Label htmlFor="end_time">End Time</Label>
+              <Input id="end_time" type="time" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} />
+            </div>
+          </div>
           {!editingEvent && (
             <div className="space-y-3 rounded-lg border border-border p-3 bg-muted/30">
               <div className="space-y-2 min-w-0">
@@ -129,16 +139,6 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
               )}
             </div>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-2 min-w-0">
-              <Label htmlFor="start_time">Start Time</Label>
-              <Input id="start_time" type="time" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} />
-            </div>
-            <div className="space-y-2 min-w-0">
-              <Label htmlFor="end_time">End Time</Label>
-              <Input id="end_time" type="time" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} />
-            </div>
-          </div>
           <div className="space-y-2">
             <Label htmlFor="location">Location</Label>
             <Input id="location" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="Lincoln Trail Cafeteria" />
