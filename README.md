@@ -65,6 +65,47 @@ node -e "console.log(require('bcryptjs').hashSync(process.argv[1], 10))" 'your-p
 in-app "Subscribe" button links to it (`webcal://` for one-tap iOS subscribe, and a plain
 URL to paste into Google Calendar's "From URL" option on Android/desktop).
 
+## Backups
+
+`scripts/backup.sh` pulls every event from the public `GET /api/events` endpoint and
+saves it as a timestamped JSON file — no login or server access required, so it can run
+from any box with outbound HTTPS (handy for keeping an off-site copy independent of the
+VPS/Postgres itself).
+
+```bash
+./scripts/backup.sh /path/to/backups
+# -> Saved 21 events to /path/to/backups/pack25-events-20260813-175240.json
+```
+
+Point it at a different deployment with `PACK25_URL=https://... ./scripts/backup.sh`.
+For scheduled backups, add it to cron, e.g. daily at 3am:
+
+```cron
+0 3 * * * /path/to/scripts/backup.sh /path/to/backups
+```
+
+### Restoring from a backup
+
+Backup files are a plain JSON array in the same shape `GET /api/events` returns. To
+restore them into a **fresh/empty** database via the API:
+
+```bash
+# 1. Log in as a leader and save the session cookie
+curl -c cookies.txt -X POST https://calendar.pack25mahomet.com/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"password":"YOUR_LEADER_PASSWORD"}'
+
+# 2. Wrap the backup array in {"records": [...]} and restore it in one batch
+curl -b cookies.txt -X POST https://calendar.pack25mahomet.com/api/events/bulk \
+  -H 'Content-Type: application/json' \
+  --data "$(jq -n --slurpfile e pack25-events-20260813-175240.json '{records: $e[0]}')"
+```
+
+`POST /api/events/bulk` always assigns each event a brand-new id — it does not use the
+`id` field in the backup file. That's fine for restoring into an empty database, but
+running it against a database that already has data will create duplicates rather than
+overwrite anything.
+
 ## Building the container image
 
 ```bash
