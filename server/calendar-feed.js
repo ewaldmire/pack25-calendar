@@ -2,7 +2,7 @@ import ical from "ical-generator";
 import { pool } from "./db.js";
 import { DENS, DEN_MAP } from "../src/lib/dens.js";
 
-const TIMEZONE = process.env.PACK_TIMEZONE || "America/New_York";
+const TIMEZONE = process.env.PACK_TIMEZONE || "America/Chicago";
 const validDens = DENS.map((d) => d.value);
 
 // ical-generator's TZID date formatting calls the Date's *local* getters
