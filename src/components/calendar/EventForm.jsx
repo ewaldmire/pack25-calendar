@@ -67,7 +67,7 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
             <Label htmlFor="name">Event Name *</Label>
             <Input id="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required placeholder="Pack Meeting" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-2 min-w-0">
               <Label htmlFor="date">Start Date *</Label>
               <Input id="date" type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} required />
@@ -96,7 +96,7 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
                 </select>
               </div>
               {form.recurrence_type !== "none" && (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-2 min-w-0">
                     <Label htmlFor="recurrence_interval">Every</Label>
                     <select
@@ -118,7 +118,7 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
               )}
             </div>
           )}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-2 min-w-0">
               <Label htmlFor="start_time">Start Time</Label>
               <Input id="start_time" type="time" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} />
@@ -134,7 +134,7 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
           </div>
           <div className="space-y-2">
             <Label>Assign to Dens</Label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {DENS.map(d => (
                 <label key={d.value} className="flex items-center gap-2 min-w-0 rounded-lg border border-border px-3 py-2 cursor-pointer hover:bg-accent transition-colors">
                   <Checkbox
