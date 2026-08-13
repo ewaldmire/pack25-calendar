@@ -8,6 +8,9 @@ on:
       - '.github/workflows/android-apk.yml'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,11 +26,34 @@ jobs:
         with:
           gradle-version: 8.7
 
+      - name: Compute datetime-based version
+        id: version
+        run: |
+          echo "code=$(( $(date -u +%s) / 60 ))" >> "$GITHUB_OUTPUT"
+          echo "name=$(date -u +'%Y.%m.%d-%H%M')" >> "$GITHUB_OUTPUT"
+
       - name: Build debug APK
         working-directory: android
+        env:
+          ANDROID_VERSION_CODE: ${{ steps.version.outputs.code }}
+          ANDROID_VERSION_NAME: ${{ steps.version.outputs.name }}
         run: gradle assembleDebug
+
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk pack25-cal-dev.apk
 
       - uses: actions/upload-artifact@v4
         with:
           name: pack25-cal-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: pack25-cal-dev.apk
+
+      - name: Publish rolling dev release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: dev
+          name: "Dev build ${{ steps.version.outputs.name }}"
+          body: |
+            Automated dev build for sideloading/Obtainium — not a stable release.
+            Points at a local dev server; see android/app/src/main/res/values/strings.xml.
+          prerelease: true
+          files: pack25-cal-dev.apk
