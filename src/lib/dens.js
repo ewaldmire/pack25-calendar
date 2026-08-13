@@ -1,11 +1,11 @@
 export const DENS = [
-  { value: "lions", label: "Lions", color: "#F59E0B", bg: "#FEF3C7", text: "#92400E" },
+  { value: "lions", label: "Lions", color: "#EAB308", bg: "#FEF9C3", text: "#854D0E" },
   { value: "tigers", label: "Tigers", color: "#F97316", bg: "#FFEDD5", text: "#9A3412" },
-  { value: "wolves", label: "Wolves", color: "#6366F1", bg: "#E0E7FF", text: "#3730A3" },
-  { value: "bears", label: "Bears", color: "#7C3AED", bg: "#EDE9FE", text: "#5B21B6" },
-  { value: "webelos", label: "Webelos", color: "#0EA5E9", bg: "#E0F2FE", text: "#075985" },
-  { value: "aols", label: "AOLs", color: "#10B981", bg: "#D1FAE5", text: "#065F46" },
-  { value: "leaders", label: "Leaders", color: "#475569", bg: "#F1F5F9", text: "#334155" },
+  { value: "wolves", label: "Wolves", color: "#EF4444", bg: "#FEE2E2", text: "#991B1B" },
+  { value: "bears", label: "Bears", color: "#3B82F6", bg: "#DBEAFE", text: "#1E40AF" },
+  { value: "webelos", label: "Webelos", color: "#22C55E", bg: "#DCFCE7", text: "#166534" },
+  { value: "aols", label: "Arrow of Light", color: "#78350F", bg: "#F3E8DA", text: "#451A03" },
+  { value: "leaders", label: "Leaders", color: "#404040", bg: "#E5E5E5", text: "#262626" },
 ];
 
 export const DEN_MAP = Object.fromEntries(DENS.map(d => [d.value, d]));

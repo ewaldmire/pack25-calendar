@@ -5,10 +5,12 @@ import {
 } from "@/components/ui/dialog";
 import { Copy, CalendarPlus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { DEN_MAP } from "@/lib/dens";
 
-export default function SubscribeDialog({ open, onOpenChange }) {
+export default function SubscribeDialog({ open, onOpenChange, selectedDens = [] }) {
   const { toast } = useToast();
-  const feedPath = "/calendar.ics";
+  const query = selectedDens.length > 0 ? `?dens=${selectedDens.map(encodeURIComponent).join(",")}` : "";
+  const feedPath = `/calendar.ics${query}`;
   const httpsUrl = typeof window !== "undefined" ? `${window.location.origin}${feedPath}` : feedPath;
   const webcalUrl = httpsUrl.replace(/^https?:/, "webcal:");
 
@@ -33,6 +35,21 @@ export default function SubscribeDialog({ open, onOpenChange }) {
             new and updated events show up without anyone re-importing anything.
           </p>
 
+          {selectedDens.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+              <span>Only events for:</span>
+              {selectedDens.map((d) => (
+                <span
+                  key={d}
+                  className="font-semibold px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: DEN_MAP[d]?.bg, color: DEN_MAP[d]?.text }}
+                >
+                  {DEN_MAP[d]?.label || d}
+                </span>
+              ))}
+            </div>
+          )}
+
           <div className="space-y-2">
             <p className="font-medium">iPhone (Apple Calendar)</p>
             <Button asChild className="w-full">
@@ -49,10 +66,10 @@ export default function SubscribeDialog({ open, onOpenChange }) {
               "From URL", and paste the link below. It will then sync to your phone.
             </p>
             <div className="flex items-center gap-2">
-              <code className="flex-1 truncate rounded-md border border-border bg-muted px-2.5 py-1.5 text-xs">
+              <code className="flex-1 break-all rounded-md border border-border bg-muted px-2.5 py-1.5 text-xs">
                 {httpsUrl}
               </code>
-              <Button type="button" variant="outline" size="icon" onClick={copyLink}>
+              <Button type="button" variant="outline" size="icon" onClick={copyLink} className="shrink-0">
                 <Copy className="w-4 h-4" />
               </Button>
             </div>

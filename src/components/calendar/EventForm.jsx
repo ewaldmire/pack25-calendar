@@ -8,6 +8,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose
 } from "@/components/ui/dialog";
 import { DENS } from "@/lib/dens";
+import { ordinalWeekdayLabel } from "@/lib/recurring";
 
 export default function EventForm({ open, onOpenChange, onSave, editingEvent }) {
   const [form, setForm] = useState({
@@ -78,7 +79,7 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
           </div>
           <div className="space-y-2">
             <Label htmlFor="location">Location</Label>
-            <Input id="location" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="Scout Hall" />
+            <Input id="location" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="Lincoln Trail Cafeteria" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
@@ -121,7 +122,10 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
                 >
                   <option value="none">Does not repeat</option>
                   <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
+                  <option value="monthly">Monthly (same date)</option>
+                  <option value="monthly_weekday">
+                    {form.date ? `Monthly on the ${ordinalWeekdayLabel(form.date)}` : "Monthly (day of week)"}
+                  </option>
                 </select>
               </div>
               {form.recurrence_type !== "none" && (
