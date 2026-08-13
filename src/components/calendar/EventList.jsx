@@ -1,11 +1,10 @@
 import React from "react";
-import { DENS, DEN_MAP } from "@/lib/dens";
-import { format, parseISO } from "date-fns";
+import { DEN_MAP } from "@/lib/dens";
 import { Pencil, Trash2, MapPin, Clock, Calendar } from "lucide-react";
 import { formatTimeRange } from "@/lib/timeFormat";
 import { formatDateRange } from "@/lib/recurring";
 
-export default function EventList({ events, onEdit, onDelete, onEventClick }) {
+export default function EventList({ events, onEdit, onDelete, onEventClick, canEdit }) {
   const sorted = [...events].sort((a, b) => (a.date || "").localeCompare(b.date || ""));
 
   return (
@@ -62,14 +61,16 @@ export default function EventList({ events, onEdit, onDelete, onEventClick }) {
                   <p className="mt-2 text-sm text-foreground/80 whitespace-pre-wrap">{ev.details}</p>
                 )}
               </div>
-              <div className="flex gap-1 print:hidden">
-                <button onClick={() => onEdit(ev)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
-                  <Pencil className="w-4 h-4" />
-                </button>
-                <button onClick={() => onDelete(ev)} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+              {canEdit && (
+                <div className="flex gap-1 print:hidden">
+                  <button onClick={() => onEdit(ev)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => onDelete(ev)} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         );

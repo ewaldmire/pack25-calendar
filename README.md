@@ -1,77 +1,91 @@
-# Base44 Project
+# Pack 25 Calendar
 
-Use this repository to run and edit the app locally, then publish changes back through Base44.
+A self-hosted event calendar for a Cub Scout pack: a filterable calendar/list view by den,
+a shared "leader" login for adding/editing/deleting events, and a public iCalendar (.ics)
+feed families can subscribe to from their phone's calendar app.
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+There are two ways this app runs:
 
-## Prerequisites
+- **Self-hosted** — a single Node/Express server that serves the built frontend and a
+  REST API backed by Postgres. This is the real deployment target.
+- **Static demo** (`VITE_DEMO_MODE=true`) — no backend at all; data lives in the
+  browser's `localStorage`. This is what's deployed to GitHub Pages
+  (`.github/workflows/deploy-pages.yml`) as a public, no-login preview.
 
-1. Clone the repository using the project's Git URL.
-2. Navigate to the project directory.
-3. Install dependencies: `npm install`.
-4. Install the Base44 CLI: `npm install -g base44@latest`.
-
-See the [Base44 CLI docs](https://docs.base44.com/developers/references/cli/get-started/overview) if you want to run Base44 commands directly.
-
-## Run Locally
-
-Run the full local development environment from the project root:
+## Local development (frontend only, against demo data)
 
 ```bash
-base44 dev
-```
-
-`base44 dev` starts the local Base44 development backend and, when this app is configured for it, also starts the frontend dev server for you. Use the frontend URL printed by the command.
-
-For example, when the Base44 project config includes a `serveCommand`, `base44 dev` can launch the frontend too:
-
-```json5
-{
-  "site": {
-    "serveCommand": "npm run dev"
-  }
-}
-```
-
-In a Base44 project this lives in `base44/config.jsonc`.
-
-## Run Only The Frontend
-
-If you only want to work on the frontend against the hosted Base44 backend, run:
-
-```bash
+npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite.
-
-## Use The Hosted Backend
-
-For frontend-only development, create or update `.env.local` in the project root:
-
-```bash
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=https://your-app.base44.app
-```
-
-`VITE_BASE44_APP_ID` identifies the Base44 app.
-
-`VITE_BASE44_APP_BASE_URL` tells the Base44 Vite plugin where to send local `/api` requests. Point it at your deployed Base44 app URL when you want the local frontend to use the hosted backend.
-
-When you use `base44 dev`, the command injects the local Base44 values for you, so `.env.local` is mainly needed for frontend-only workflows.
-
-## Publish Your Changes
-
-After pushing your changes to git, open the Base44 dashboard and publish the app:
+This runs the Vite dev server. Without `VITE_DEMO_MODE=true` set, `eventsClient.js` will
+try to talk to a backend at `/api/*`, which won't exist unless you're also running
+`npm run start:server` (see below). To develop the frontend in isolation against the
+local mock data instead:
 
 ```bash
-base44 dashboard open
+VITE_DEMO_MODE=true npm run dev
 ```
 
-## Docs & Support
+## Running the self-hosted app locally
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
+You need a Postgres instance. With [podman](https://podman.io) (Docker works the same way):
 
-Base44 CLI command reference: [https://docs.base44.com/developers/references/cli/commands/introduction](https://docs.base44.com/developers/references/cli/commands/introduction)
+```bash
+podman run --name pack25-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
+```
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+Set the required environment variables (see `.env.example`) and build + run:
+
+```bash
+cp .env.example .env
+# edit .env: set DATABASE_URL, SESSION_SECRET, LEADER_PASSWORD_HASH
+
+npm install
+npm run build          # builds the frontend into dist/
+export $(cat .env | xargs)
+npm run start:server   # serves dist/ + the API on $PORT (default 3000)
+```
+
+Open `http://localhost:3000`.
+
+### Generating `LEADER_PASSWORD_HASH`
+
+The app uses one shared password for all pack leaders (not per-user accounts). Generate a
+bcrypt hash of your chosen password and put it in `.env`:
+
+```bash
+node -e "console.log(require('bcryptjs').hashSync(process.argv[1], 10))" 'your-password-here'
+```
+
+### Calendar subscription feed
+
+`GET /calendar.ics` returns a live iCalendar feed of all events — no login required. The
+in-app "Subscribe" button links to it (`webcal://` for one-tap iOS subscribe, and a plain
+URL to paste into Google Calendar's "From URL" option on Android/desktop).
+
+## Building the container image
+
+```bash
+podman build -t pack25-calendar .
+podman run -p 3000:3000 --env-file .env pack25-calendar
+```
+
+The `Dockerfile` is a multi-stage build: it builds the frontend, then copies `dist/` and
+`server/` into a Node runtime image. Deployment onto Postgres + this image (e.g. on an
+OKD/OpenShift cluster) is a separate, later step — this repo currently only produces the
+image.
+
+## Environment variables
+
+See `.env.example`. In short: `DATABASE_URL` (Postgres connection string),
+`SESSION_SECRET` (random string used to sign leader session cookies),
+`LEADER_PASSWORD_HASH` (bcrypt hash from above), `PACK_TIMEZONE` (IANA zone name for
+timed events in the .ics feed, e.g. `America/New_York`), `PORT` (default `3000`).
+
+## Other scripts
+
+- `npm run lint` / `npm run lint:fix`
+- `npm run typecheck`
+- `npm run preview` — preview a production build locally (frontend only, no API)

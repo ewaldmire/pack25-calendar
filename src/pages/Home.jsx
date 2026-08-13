@@ -7,16 +7,19 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
-import { Plus, Calendar as CalendarIcon, List, Printer, ChevronLeft, ChevronRight, Upload, Loader2 } from "lucide-react";
+import { Plus, Calendar as CalendarIcon, List, Printer, ChevronLeft, ChevronRight, Loader2, CalendarPlus, LogIn, LogOut } from "lucide-react";
 
 import EventForm from "@/components/calendar/EventForm";
 import EventList from "@/components/calendar/EventList";
 import CalendarGrid from "@/components/calendar/CalendarGrid";
 import FilterBar from "@/components/calendar/FilterBar";
-import UploadEvents from "@/components/calendar/UploadEvents";
 import EventModal from "@/components/calendar/EventModal";
+import LoginDialog from "@/components/calendar/LoginDialog";
+import SubscribeDialog from "@/components/calendar/SubscribeDialog";
 import { cn } from "@/lib/utils";
 import { generateRecurrenceDates } from "@/lib/recurring";
+import { useAuth } from "@/lib/AuthContext";
+import { DEMO_MODE } from "@/lib/demoMode";
 
 export default function Home() {
   const [events, setEvents] = useState([]);
@@ -25,12 +28,14 @@ export default function Home() {
   const [selectedDens, setSelectedDens] = useState([]);
   const [monthDate, setMonthDate] = useState(new Date());
   const [formOpen, setFormOpen] = useState(false);
-  const [uploadOpen, setUploadOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [subscribeOpen, setSubscribeOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [modalEvent, setModalEvent] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
+  const { isAuthenticated, logout } = useAuth();
 
   const loadEvents = useCallback(async () => {
     setLoading(true);
@@ -120,15 +125,30 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setUploadOpen(true)} className="hidden sm:flex">
-              <Upload className="w-4 h-4 mr-1.5" /> Import
-            </Button>
+            {!DEMO_MODE && (
+              <Button variant="outline" size="sm" onClick={() => setSubscribeOpen(true)} className="hidden sm:flex">
+                <CalendarPlus className="w-4 h-4 mr-1.5" /> Subscribe
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={() => window.print()}>
               <Printer className="w-4 h-4 mr-1.5" /> Print
             </Button>
-            <Button size="sm" onClick={openNew}>
-              <Plus className="w-4 h-4 mr-1.5" /> Add Event
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <Button size="sm" onClick={openNew}>
+                  <Plus className="w-4 h-4 mr-1.5" /> Add Event
+                </Button>
+                {!DEMO_MODE && (
+                  <Button variant="ghost" size="sm" onClick={logout} title="Log out">
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                )}
+              </>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => setLoginOpen(true)}>
+                <LogIn className="w-4 h-4 mr-1.5" /> Leader Login
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -164,9 +184,11 @@ export default function Home() {
               <h2 className="text-lg font-semibold">All Events</h2>
             )}
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => setUploadOpen(true)} className="sm:hidden">
-                <Upload className="w-4 h-4 mr-1.5" /> Import
-              </Button>
+              {!DEMO_MODE && (
+                <Button variant="outline" size="sm" onClick={() => setSubscribeOpen(true)} className="sm:hidden">
+                  <CalendarPlus className="w-4 h-4 mr-1.5" /> Subscribe
+                </Button>
+              )}
               <div className="flex rounded-lg border border-border overflow-hidden">
                 <button
                   onClick={() => setView("calendar")}
@@ -196,7 +218,7 @@ export default function Home() {
               events={monthEvents}
               monthDate={monthDate}
               onEventClick={setModalEvent}
-              onDayClick={(dateStr) => { setEditingEvent(null); setFormOpen(true); }}
+              onDayClick={isAuthenticated ? (dateStr) => { setEditingEvent(null); setFormOpen(true); } : undefined}
             />
           ) : (
             <EventList
@@ -204,14 +226,16 @@ export default function Home() {
               onEdit={handleEdit}
               onDelete={setDeleteTarget}
               onEventClick={setModalEvent}
+              canEdit={isAuthenticated}
             />
           )}
         </div>
       </main>
 
       <EventForm open={formOpen} onOpenChange={(o) => { setFormOpen(o); if (!o) setEditingEvent(null); }} onSave={handleSave} editingEvent={editingEvent} />
-      <UploadEvents open={uploadOpen} onOpenChange={setUploadOpen} onImported={loadEvents} />
-      <EventModal event={modalEvent} onOpenChange={setModalEvent} onEdit={handleEdit} onDelete={setDeleteTarget} />
+      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
+      <SubscribeDialog open={subscribeOpen} onOpenChange={setSubscribeOpen} />
+      <EventModal event={modalEvent} onOpenChange={setModalEvent} onEdit={handleEdit} onDelete={setDeleteTarget} canEdit={isAuthenticated} />
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
