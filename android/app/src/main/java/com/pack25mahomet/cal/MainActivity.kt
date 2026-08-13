@@ -6,6 +6,7 @@ import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 // Thin WebView wrapper around the self-hosted dev server (see @string/server_url).
 // Cleartext HTTP is allowed app-wide in the manifest since this points at a plain
@@ -13,17 +14,31 @@ import androidx.appcompat.app.AppCompatActivity
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
+    private lateinit var swipeRefresh: SwipeRefreshLayout
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         webView = WebView(this)
-        setContentView(webView)
+        swipeRefresh = SwipeRefreshLayout(this)
+        swipeRefresh.addView(webView)
+        setContentView(swipeRefresh)
 
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
-        webView.webViewClient = WebViewClient()
+        // Stop the refresh spinner once the reloaded page has actually finished
+        // loading, rather than as soon as the reload is kicked off.
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                swipeRefresh.isRefreshing = false
+            }
+        }
+
+        swipeRefresh.setOnRefreshListener {
+            webView.reload()
+        }
 
         CookieManager.getInstance().setAcceptCookie(true)
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
