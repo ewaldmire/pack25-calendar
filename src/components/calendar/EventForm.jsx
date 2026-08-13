@@ -10,6 +10,8 @@ import {
 import { DENS } from "@/lib/dens";
 import { ordinalWeekdayLabel } from "@/lib/recurring";
 
+const DEFAULT_LOCATION = "Lincoln Trail Cafeteria";
+
 export default function EventForm({ open, onOpenChange, onSave, editingEvent }) {
   const [form, setForm] = useState({
     name: "", date: "", end_date: "", start_time: "", end_time: "", location: "", details: "", dens: [],
@@ -33,7 +35,7 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
         recurrence_type: "none", recurrence_interval: 1, recurrence_end_date: ""
       });
     } else {
-      setForm({ name: "", date: "", end_date: "", start_time: "", end_time: "", location: "", details: "", dens: [], recurrence_type: "none", recurrence_interval: 1, recurrence_end_date: "" });
+      setForm({ name: "", date: "", end_date: "", start_time: "", end_time: "", location: DEFAULT_LOCATION, details: "", dens: [], recurrence_type: "none", recurrence_interval: 1, recurrence_end_date: "" });
     }
   }, [editingEvent, open]);
 
