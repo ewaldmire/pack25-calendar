@@ -18,7 +18,7 @@ const eventSchema = z.object({
   end_time: optionalText,
   location: optionalText,
   details: optionalText,
-  dens: z.array(z.enum(validDens)).optional().default([]),
+  dens: z.array(z.enum(validDens)).min(1, "Select at least one den"),
 });
 
 // .partial() re-wraps each field in an outer ZodOptional, so an absent key
