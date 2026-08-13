@@ -92,7 +92,7 @@ timed events in the .ics feed, e.g. `America/New_York`), `PORT` (default `3000`)
 
 ## Android wrapper app (dev/testing only)
 
-`android/` is a minimal WebView wrapper ("Pack 25 Cal") that just loads a
+`android/` is a minimal WebView wrapper ("Pack 25 Calendar") that just loads a
 hardcoded server URL — currently your laptop's LAN IP running the podman dev
 container (`android/app/src/main/res/values/strings.xml`, `server_url`). It's
 for sideloading onto a phone during local development, not a real distributable
