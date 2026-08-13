@@ -84,6 +84,34 @@ For scheduled backups, add it to cron, e.g. daily at 3am:
 0 3 * * * /path/to/scripts/backup.sh /path/to/backups
 ```
 
+### Spinning up a disposable dev environment for a test restore
+
+To verify a backup actually restores cleanly, run the real published image against a
+throwaway local Postgres — no source checkout or build required, just Docker Hub:
+
+```bash
+podman run --name pack25-test-pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16-alpine
+
+LEADER_HASH=$(node -e "console.log(require('bcryptjs').hashSync(process.argv[1], 10))" 'testpass123')
+
+podman run --name pack25-test-app --network host \
+  -e DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/postgres \
+  -e SESSION_SECRET=test-secret \
+  -e LEADER_PASSWORD_HASH="$LEADER_HASH" \
+  -e PORT=3000 \
+  -e NODE_ENV=development \
+  -d docker.io/esw4/pack25-calendar:latest
+```
+
+Open `http://localhost:3000` — it should load with an empty calendar (leader password
+is `testpass123`). Continue with the restore steps below to load a backup into it.
+
+Tear it down when you're done:
+
+```bash
+podman rm -f pack25-test-app pack25-test-pg
+```
+
 ### Restoring from a backup
 
 Backup files are a plain JSON array in the same shape `GET /api/events` returns. To
