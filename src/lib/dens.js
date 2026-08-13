@@ -10,6 +10,14 @@ export const DENS = [
 
 export const DEN_MAP = Object.fromEntries(DENS.map(d => [d.value, d]));
 
+// Cub Scouting's own blue-and-gold, used for events tied to more than one
+// den so the calendar isn't misleadingly colored as if it belonged to
+// whichever den happens to be first in the list.
+export const MULTI_DEN_STYLE = {
+  background: "linear-gradient(135deg, #D9E6F5 50%, #FCEEC0 50%)",
+  color: "#1E293B",
+};
+
 export function densForEvent(event) {
   if (!event.dens || event.dens.length === 0) return [DEN_MAP.leaders];
   return event.dens.map(d => DEN_MAP[d]).filter(Boolean);
