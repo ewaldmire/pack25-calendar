@@ -89,3 +89,18 @@ timed events in the .ics feed, e.g. `America/New_York`), `PORT` (default `3000`)
 - `npm run lint` / `npm run lint:fix`
 - `npm run typecheck`
 - `npm run preview` — preview a production build locally (frontend only, no API)
+
+## Android wrapper app (dev/testing only)
+
+`android/` is a minimal WebView wrapper ("Pack 25 Cal") that just loads a
+hardcoded server URL — currently your laptop's LAN IP running the podman dev
+container (`android/app/src/main/res/values/strings.xml`, `server_url`). It's
+for sideloading onto a phone during local development, not a real distributable
+app: no signing, no Play Store metadata, cleartext HTTP allowed app-wide.
+
+Push to `main` with changes under `android/` (or trigger manually) to run
+`.github/workflows/android-apk.yml`, which builds a debug APK and uploads it
+as a workflow run artifact — download it from the Actions run and sideload
+(enable "install unknown apps" for whichever app you download it with).
+
+If your laptop's IP changes, update `server_url` and push again to rebuild.
