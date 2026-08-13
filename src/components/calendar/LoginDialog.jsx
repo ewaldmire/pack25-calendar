@@ -21,7 +21,6 @@ export default function LoginDialog({ open, onOpenChange }) {
       await login(password);
       setPassword("");
       onOpenChange(false);
-      toast({ title: "Logged in" });
     } catch (err) {
       toast({ variant: "destructive", title: "Login failed", description: err.message });
     } finally {
