@@ -1,5 +1,6 @@
 <resources>
     <style name="Theme.Pack25Cal" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:statusBarColor">@color/launcher_background</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>
