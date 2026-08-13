@@ -115,7 +115,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border print:hidden">
+      <header className="sticky top-0 z-30 bg-primary print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <img
@@ -123,30 +123,30 @@ export default function Home() {
               alt="Pack 25 Mahomet"
               className="w-9 h-9 rounded-lg object-contain shadow-sm"
             />
-            <h1 className="font-bold text-base sm:text-lg leading-tight">Pack 25 Mahomet</h1>
+            <h1 className="font-bold text-base sm:text-lg leading-tight text-primary-foreground">Pack 25 Mahomet</h1>
           </div>
           <div className="flex items-center gap-2">
             {!DEMO_MODE && !isAuthenticated && (
-              <Button variant="outline" size="sm" onClick={() => setSubscribeOpen(true)}>
+              <Button variant="outline" size="sm" onClick={() => setSubscribeOpen(true)} className="border-white/40 bg-transparent text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
                 <CalendarPlus className="w-4 h-4 mr-1.5" /> Subscribe
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={() => window.print()} className="hidden sm:flex">
+            <Button variant="outline" size="sm" onClick={() => window.print()} className="hidden sm:flex border-white/40 bg-transparent text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
               <Printer className="w-4 h-4 mr-1.5" /> Print
             </Button>
             {isAuthenticated ? (
               <>
-                <Button size="sm" onClick={openNew}>
+                <Button size="sm" onClick={openNew} className="bg-gold text-primary hover:bg-gold/90">
                   <Plus className="w-4 h-4 mr-1.5" /> Add Event
                 </Button>
                 {!DEMO_MODE && (
-                  <Button variant="ghost" size="sm" onClick={logout}>
+                  <Button variant="ghost" size="sm" onClick={logout} className="text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
                     <LogOut className="w-4 h-4 mr-1.5" /> Log Out
                   </Button>
                 )}
               </>
             ) : (
-              <Button variant="outline" size="sm" onClick={() => setLoginOpen(true)}>
+              <Button variant="outline" size="sm" onClick={() => setLoginOpen(true)} className="border-white/40 bg-transparent text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
                 <LogIn className="w-4 h-4 mr-1.5" /> Leader Login
               </Button>
             )}
