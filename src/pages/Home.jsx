@@ -126,7 +126,7 @@ export default function Home() {
             <h1 className="font-bold text-base sm:text-lg leading-tight">Pack 25 Mahomet</h1>
           </div>
           <div className="flex items-center gap-2">
-            {!DEMO_MODE && (
+            {!DEMO_MODE && !isAuthenticated && (
               <Button variant="outline" size="sm" onClick={() => setSubscribeOpen(true)}>
                 <CalendarPlus className="w-4 h-4 mr-1.5" /> Subscribe
               </Button>
