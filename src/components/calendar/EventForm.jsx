@@ -21,6 +21,7 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
   });
   const [saving, setSaving] = useState(false);
   const [densError, setDensError] = useState(false);
+  const [allDay, setAllDay] = useState(false);
 
   useEffect(() => {
     setDensError(false);
@@ -36,10 +37,21 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
         dens: editingEvent.dens || [],
         recurrence_type: "none", recurrence_interval: 1, recurrence_end_date: ""
       });
+      setAllDay(!editingEvent.start_time);
     } else {
       setForm({ name: "", date: "", end_date: "", start_time: DEFAULT_START_TIME, end_time: DEFAULT_END_TIME, location: DEFAULT_LOCATION, details: "", dens: [], recurrence_type: "none", recurrence_interval: 1, recurrence_end_date: "" });
+      setAllDay(false);
     }
   }, [editingEvent, open]);
+
+  const handleAllDayChange = (checked) => {
+    setAllDay(checked);
+    setForm(f => ({
+      ...f,
+      start_time: checked ? "" : DEFAULT_START_TIME,
+      end_time: checked ? "" : DEFAULT_END_TIME,
+    }));
+  };
 
   const toggleDen = (den) => {
     setForm(f => ({
@@ -88,16 +100,22 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
               <Input id="end_date" type="date" value={form.end_date || ""} onChange={e => setForm({ ...form, end_date: e.target.value })} />
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-2 min-w-0">
-              <Label htmlFor="start_time">Start Time</Label>
-              <Input id="start_time" type="time" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} />
+          <label className="flex items-center gap-2 cursor-pointer w-fit">
+            <Checkbox checked={allDay} onCheckedChange={(checked) => handleAllDayChange(!!checked)} />
+            <span className="text-sm">All Day</span>
+          </label>
+          {!allDay && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-2 min-w-0">
+                <Label htmlFor="start_time">Start Time</Label>
+                <Input id="start_time" type="time" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} />
+              </div>
+              <div className="space-y-2 min-w-0">
+                <Label htmlFor="end_time">End Time</Label>
+                <Input id="end_time" type="time" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} />
+              </div>
             </div>
-            <div className="space-y-2 min-w-0">
-              <Label htmlFor="end_time">End Time</Label>
-              <Input id="end_time" type="time" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} />
-            </div>
-          </div>
+          )}
           {!editingEvent && (
             <div className="space-y-3 rounded-lg border border-border p-3 bg-muted/30">
               <div className="space-y-2 min-w-0">

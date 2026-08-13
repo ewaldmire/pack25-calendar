@@ -73,6 +73,7 @@ export default function CalendarGrid({ events, monthDate, onEventClick, onDayCli
                       title={ev.name}
                     >
                       {ev.start_time && <span className="opacity-70 mr-1 print:hidden">{formatTime(ev.start_time)}</span>}
+                      {!ev.start_time && !ev.end_time && <span className="opacity-70 mr-1 print:hidden">All Day</span>}
                       {ev.name}
                     </button>
                   );

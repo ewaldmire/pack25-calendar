@@ -44,12 +44,10 @@ export default function EventList({ events, onEdit, onDelete, onEventClick, canE
                       {formatDateRange(ev.date, ev.end_date)}
                     </span>
                   )}
-                  {(ev.start_time || ev.end_time) && (
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      {formatTimeRange(ev.start_time, ev.end_time)}
-                    </span>
-                  )}
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" />
+                    {ev.start_time || ev.end_time ? formatTimeRange(ev.start_time, ev.end_time) : "All Day"}
+                  </span>
                   {ev.location && (
                     <span className="flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5" />
