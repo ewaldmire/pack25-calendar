@@ -16,8 +16,10 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
     recurrence_type: "none", recurrence_interval: 1, recurrence_end_date: ""
   });
   const [saving, setSaving] = useState(false);
+  const [densError, setDensError] = useState(false);
 
   useEffect(() => {
+    setDensError(false);
     if (editingEvent) {
       setForm({
         name: editingEvent.name || "",
@@ -31,7 +33,7 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
         recurrence_type: "none", recurrence_interval: 1, recurrence_end_date: ""
       });
     } else {
-      setForm({ name: "", date: "", end_date: "", start_time: "", end_time: "", location: "", details: "", dens: ["leaders"], recurrence_type: "none", recurrence_interval: 1, recurrence_end_date: "" });
+      setForm({ name: "", date: "", end_date: "", start_time: "", end_time: "", location: "", details: "", dens: [], recurrence_type: "none", recurrence_interval: 1, recurrence_end_date: "" });
     }
   }, [editingEvent, open]);
 
@@ -42,11 +44,16 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
         ? f.dens.filter(d => d !== den)
         : [...f.dens, den]
     }));
+    setDensError(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.date) return;
+    if (form.dens.length === 0) {
+      setDensError(true);
+      return;
+    }
     setSaving(true);
     try {
       await onSave(form);
@@ -133,7 +140,7 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
             <Input id="location" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="Lincoln Trail Cafeteria" />
           </div>
           <div className="space-y-2">
-            <Label>Assign to Dens</Label>
+            <Label>Assign to Dens *</Label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {DENS.map(d => (
                 <label key={d.value} className="flex items-center gap-2 min-w-0 rounded-lg border border-border px-3 py-2 cursor-pointer hover:bg-accent transition-colors">
@@ -146,6 +153,9 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
                 </label>
               ))}
             </div>
+            {densError && (
+              <p className="text-sm text-destructive">Select at least one den.</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="details">Details</Label>
