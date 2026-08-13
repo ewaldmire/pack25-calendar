@@ -36,11 +36,9 @@ export default function EventModal({ event, onOpenChange, onEdit, onDelete, canE
                 <Calendar className="w-4 h-4" /> {formatDateRange(event.date, event.end_date)}
               </div>
             )}
-            {(event.start_time || event.end_time) && (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Clock className="w-4 h-4" /> {formatTimeRange(event.start_time, event.end_time)}
-              </div>
-            )}
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Clock className="w-4 h-4" /> {event.start_time || event.end_time ? formatTimeRange(event.start_time, event.end_time) : "All Day"}
+            </div>
             {event.location && (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <MapPin className="w-4 h-4" /> {event.location}
