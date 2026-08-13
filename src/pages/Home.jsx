@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { Event } from "@/api/eventsClient";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -35,7 +35,7 @@ export default function Home() {
   const loadEvents = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await base44.entities.Event.list();
+      const data = await Event.list();
       setEvents(data);
     } catch (err) {
       toast({ variant: "destructive", title: "Could not load events", description: err.message });
@@ -73,15 +73,15 @@ export default function Home() {
       location: base.location, details: base.details, dens: base.dens
     };
     if (editingEvent) {
-      await base44.entities.Event.update(editingEvent.id, cleanBase);
+      await Event.update(editingEvent.id, cleanBase);
       toast({ title: "Event updated" });
     } else if (recurrence_type !== "none" && recurrence_end_date) {
       const dates = generateRecurrenceDates(base.date, recurrence_type, recurrence_interval || 1, recurrence_end_date);
       const records = dates.map(d => ({ ...cleanBase, date: d }));
-      await base44.entities.Event.bulkCreate(records);
+      await Event.bulkCreate(records);
       toast({ title: `${dates.length} recurring events added` });
     } else {
-      await base44.entities.Event.create(cleanBase);
+      await Event.create(cleanBase);
       toast({ title: "Event added" });
     }
     setEditingEvent(null);
@@ -94,7 +94,7 @@ export default function Home() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      await base44.entities.Event.delete(deleteTarget.id);
+      await Event.delete(deleteTarget.id);
       toast({ title: "Event deleted" });
       setDeleteTarget(null);
       await loadEvents();
