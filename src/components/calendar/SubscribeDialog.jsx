@@ -31,8 +31,8 @@ export default function SubscribeDialog({ open, onOpenChange, selectedDens = [] 
         </DialogHeader>
         <div className="space-y-4 text-sm">
           <p className="text-muted-foreground">
-            Subscribing adds pack events to your phone's calendar app automatically —
-            new and updated events show up without anyone re-importing anything.
+            Subscribing adds Pack 25 events to your phone's calendar app automatically —
+            Select the Den(s) you want before clicking the "Subscribe" button.
           </p>
 
           {selectedDens.length > 0 && (
