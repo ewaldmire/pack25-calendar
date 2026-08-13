@@ -11,6 +11,7 @@ import { DENS } from "@/lib/dens";
 import { ordinalWeekdayLabel } from "@/lib/recurring";
 
 const DEFAULT_LOCATION = "Lincoln Trail Cafeteria";
+const DEFAULT_START_TIME = "18:00"; // 6:00 PM — most pack events are evening
 
 export default function EventForm({ open, onOpenChange, onSave, editingEvent }) {
   const [form, setForm] = useState({
@@ -35,7 +36,7 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
         recurrence_type: "none", recurrence_interval: 1, recurrence_end_date: ""
       });
     } else {
-      setForm({ name: "", date: "", end_date: "", start_time: "", end_time: "", location: DEFAULT_LOCATION, details: "", dens: [], recurrence_type: "none", recurrence_interval: 1, recurrence_end_date: "" });
+      setForm({ name: "", date: "", end_date: "", start_time: DEFAULT_START_TIME, end_time: "", location: DEFAULT_LOCATION, details: "", dens: [], recurrence_type: "none", recurrence_interval: 1, recurrence_end_date: "" });
     }
   }, [editingEvent, open]);
 
