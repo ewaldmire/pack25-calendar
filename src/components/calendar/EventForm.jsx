@@ -77,39 +77,6 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
               <Input id="end_date" type="date" value={form.end_date || ""} onChange={e => setForm({ ...form, end_date: e.target.value })} />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
-            <Input id="location" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="Lincoln Trail Cafeteria" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2 min-w-0">
-              <Label htmlFor="start_time">Start Time</Label>
-              <Input id="start_time" type="time" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} />
-            </div>
-            <div className="space-y-2 min-w-0">
-              <Label htmlFor="end_time">End Time</Label>
-              <Input id="end_time" type="time" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Assign to Dens</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {DENS.map(d => (
-                <label key={d.value} className="flex items-center gap-2 min-w-0 rounded-lg border border-border px-3 py-2 cursor-pointer hover:bg-accent transition-colors">
-                  <Checkbox
-                    checked={form.dens.includes(d.value)}
-                    onCheckedChange={() => toggleDen(d.value)}
-                  />
-                  <span className="w-2.5 h-2.5 shrink-0 rounded-full" style={{ backgroundColor: d.color }} />
-                  <span className="text-sm min-w-0">{d.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="details">Details</Label>
-            <Textarea id="details" value={form.details} onChange={e => setForm({ ...form, details: e.target.value })} rows={3} placeholder="What to bring, agenda, notes..." />
-          </div>
           {!editingEvent && (
             <div className="space-y-3 rounded-lg border border-border p-3 bg-muted/30">
               <div className="space-y-2 min-w-0">
@@ -151,6 +118,39 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
               )}
             </div>
           )}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2 min-w-0">
+              <Label htmlFor="start_time">Start Time</Label>
+              <Input id="start_time" type="time" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} />
+            </div>
+            <div className="space-y-2 min-w-0">
+              <Label htmlFor="end_time">End Time</Label>
+              <Input id="end_time" type="time" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Input id="location" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="Lincoln Trail Cafeteria" />
+          </div>
+          <div className="space-y-2">
+            <Label>Assign to Dens</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {DENS.map(d => (
+                <label key={d.value} className="flex items-center gap-2 min-w-0 rounded-lg border border-border px-3 py-2 cursor-pointer hover:bg-accent transition-colors">
+                  <Checkbox
+                    checked={form.dens.includes(d.value)}
+                    onCheckedChange={() => toggleDen(d.value)}
+                  />
+                  <span className="w-2.5 h-2.5 shrink-0 rounded-full" style={{ backgroundColor: d.color }} />
+                  <span className="text-sm min-w-0">{d.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="details">Details</Label>
+            <Textarea id="details" value={form.details} onChange={e => setForm({ ...form, details: e.target.value })} rows={3} placeholder="What to bring, agenda, notes..." />
+          </div>
           <DialogFooter>
             <DialogClose asChild>
               <Button type="button" variant="outline">Cancel</Button>
