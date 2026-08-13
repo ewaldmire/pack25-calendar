@@ -118,19 +118,20 @@ export default function Home() {
       <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">CS</div>
-            <div>
-              <h1 className="font-bold text-base sm:text-lg leading-tight">Cub Scout Pack Calendar</h1>
-              <p className="text-xs text-muted-foreground leading-tight hidden sm:block">Plan, filter & print pack events</p>
-            </div>
+            <img
+              src="https://www.pack25mahomet.com/assets/cub-scouts-logo.png"
+              alt="Pack 25 Mahomet"
+              className="w-9 h-9 rounded-lg object-contain shadow-sm"
+            />
+            <h1 className="font-bold text-base sm:text-lg leading-tight">Pack 25 Mahomet</h1>
           </div>
           <div className="flex items-center gap-2">
             {!DEMO_MODE && (
-              <Button variant="outline" size="sm" onClick={() => setSubscribeOpen(true)} className="hidden sm:flex">
+              <Button variant="outline" size="sm" onClick={() => setSubscribeOpen(true)}>
                 <CalendarPlus className="w-4 h-4 mr-1.5" /> Subscribe
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Button variant="outline" size="sm" onClick={() => window.print()} className="hidden sm:flex">
               <Printer className="w-4 h-4 mr-1.5" /> Print
             </Button>
             {isAuthenticated ? (
@@ -139,8 +140,8 @@ export default function Home() {
                   <Plus className="w-4 h-4 mr-1.5" /> Add Event
                 </Button>
                 {!DEMO_MODE && (
-                  <Button variant="ghost" size="sm" onClick={logout} title="Log out">
-                    <LogOut className="w-4 h-4" />
+                  <Button variant="ghost" size="sm" onClick={logout}>
+                    <LogOut className="w-4 h-4 mr-1.5" /> Log Out
                   </Button>
                 )}
               </>
@@ -156,7 +157,7 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
         {/* Print-only header */}
         <div className="hidden print:block mb-4">
-          <h1 className="text-2xl font-bold">Cub Scout Pack Calendar</h1>
+          <h1 className="text-2xl font-bold">Pack 25 Mahomet</h1>
           <p className="text-sm text-muted-foreground">{view === "calendar" ? format(monthDate, "MMMM yyyy") : "All Events"}</p>
         </div>
 
@@ -184,11 +185,6 @@ export default function Home() {
               <h2 className="text-lg font-semibold">All Events</h2>
             )}
             <div className="flex items-center gap-2">
-              {!DEMO_MODE && (
-                <Button variant="outline" size="sm" onClick={() => setSubscribeOpen(true)} className="sm:hidden">
-                  <CalendarPlus className="w-4 h-4 mr-1.5" /> Subscribe
-                </Button>
-              )}
               <div className="flex rounded-lg border border-border overflow-hidden">
                 <button
                   onClick={() => setView("calendar")}
@@ -234,7 +230,7 @@ export default function Home() {
 
       <EventForm open={formOpen} onOpenChange={(o) => { setFormOpen(o); if (!o) setEditingEvent(null); }} onSave={handleSave} editingEvent={editingEvent} />
       <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
-      <SubscribeDialog open={subscribeOpen} onOpenChange={setSubscribeOpen} />
+      <SubscribeDialog open={subscribeOpen} onOpenChange={setSubscribeOpen} selectedDens={selectedDens} />
       <EventModal event={modalEvent} onOpenChange={setModalEvent} onEdit={handleEdit} onDelete={setDeleteTarget} canEdit={isAuthenticated} />
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <AlertDialogContent>

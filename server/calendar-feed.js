@@ -1,7 +1,9 @@
 import ical from "ical-generator";
 import { pool } from "./db.js";
+import { DENS, DEN_MAP } from "../src/lib/dens.js";
 
 const TIMEZONE = process.env.PACK_TIMEZONE || "America/New_York";
+const validDens = DENS.map((d) => d.value);
 
 // ical-generator's TZID date formatting calls the Date's *local* getters
 // (getHours(), getDate(), etc — driven by the Node process's own OS
@@ -24,9 +26,21 @@ function wallClockDateTime(dateStr, timeStr) {
 
 export function registerCalendarFeed(app) {
   app.get("/calendar.ics", async (req, res) => {
-    const result = await pool.query("SELECT * FROM events ORDER BY date ASC");
+    const requestedDens = typeof req.query.dens === "string"
+      ? req.query.dens.split(",").map((d) => d.trim()).filter((d) => validDens.includes(d))
+      : [];
 
-    const calendar = ical({ name: "Pack 25 Calendar", timezone: TIMEZONE, ttl: 60 * 60 });
+    // `&&` is Postgres's array-overlap operator — matches the frontend's
+    // `ev.dens.some(d => selectedDens.includes(d))` filter exactly,
+    // including excluding events with an empty dens array.
+    const result = requestedDens.length > 0
+      ? await pool.query("SELECT * FROM events WHERE dens && $1::text[] ORDER BY date ASC", [requestedDens])
+      : await pool.query("SELECT * FROM events ORDER BY date ASC");
+
+    const calendarName = requestedDens.length > 0
+      ? `Pack 25 Calendar — ${requestedDens.map((d) => DEN_MAP[d]?.label || d).join(", ")}`
+      : "Pack 25 Calendar";
+    const calendar = ical({ name: calendarName, timezone: TIMEZONE, ttl: 60 * 60 });
 
     for (const row of result.rows) {
       const isAllDay = !row.start_time;
