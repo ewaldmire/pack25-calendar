@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">Pack 25 Calendar</string>
-    <!-- Your laptop's LAN IP running the podman dev container. Update and
-         rebuild if your router reassigns it. -->
-    <string name="server_url">http://192.168.25.72:3000</string>
+    <string name="server_url">https://calendar.pack25mahomet.com</string>
     <string name="refresh">Refresh</string>
 </resources>
