@@ -1,5 +1,5 @@
 import React from "react";
-import { DENS, DEN_MAP } from "@/lib/dens";
+import { DEN_MAP } from "@/lib/dens";
 import { formatTime } from "@/lib/timeFormat";
 import { getEventDates } from "@/lib/recurring";
 import { cn } from "@/lib/utils";

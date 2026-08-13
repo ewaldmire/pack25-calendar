@@ -4,12 +4,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { DEN_MAP } from "@/lib/dens";
-import { format, parseISO } from "date-fns";
 import { Calendar, Clock, MapPin, Pencil, Trash2 } from "lucide-react";
 import { formatTimeRange } from "@/lib/timeFormat";
 import { formatDateRange } from "@/lib/recurring";
 
-export default function EventModal({ event, onOpenChange, onEdit, onDelete }) {
+export default function EventModal({ event, onOpenChange, onEdit, onDelete, canEdit }) {
   if (!event) return null;
   const dens = event.dens && event.dens.length ? event.dens : ["leaders"];
 
@@ -55,15 +54,21 @@ export default function EventModal({ event, onOpenChange, onEdit, onDelete }) {
           )}
         </div>
         <DialogFooter className="flex justify-between sm:justify-between">
-          <Button variant="destructive" size="sm" onClick={() => { onOpenChange(false); onDelete(event); }}>
-            <Trash2 className="w-4 h-4 mr-1.5" /> Delete
-          </Button>
-          <div className="flex gap-2">
-            <DialogClose asChild><Button variant="outline">Close</Button></DialogClose>
-            <Button size="sm" onClick={() => { onOpenChange(false); onEdit(event); }}>
-              <Pencil className="w-4 h-4 mr-1.5" /> Edit
-            </Button>
-          </div>
+          {canEdit ? (
+            <>
+              <Button variant="destructive" size="sm" onClick={() => { onOpenChange(false); onDelete(event); }}>
+                <Trash2 className="w-4 h-4 mr-1.5" /> Delete
+              </Button>
+              <div className="flex gap-2">
+                <DialogClose asChild><Button variant="outline">Close</Button></DialogClose>
+                <Button size="sm" onClick={() => { onOpenChange(false); onEdit(event); }}>
+                  <Pencil className="w-4 h-4 mr-1.5" /> Edit
+                </Button>
+              </div>
+            </>
+          ) : (
+            <DialogClose asChild><Button variant="outline" className="ml-auto">Close</Button></DialogClose>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
