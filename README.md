@@ -82,7 +82,7 @@ image.
 See `.env.example`. In short: `DATABASE_URL` (Postgres connection string),
 `SESSION_SECRET` (random string used to sign leader session cookies),
 `LEADER_PASSWORD_HASH` (bcrypt hash from above), `PACK_TIMEZONE` (IANA zone name for
-timed events in the .ics feed, e.g. `America/New_York`), `PORT` (default `3000`).
+timed events in the .ics feed — defaults to `America/Chicago`), `PORT` (default `3000`).
 
 ## Other scripts
 
