@@ -1,4 +1,6 @@
 <resources>
     <color name="launcher_background">#FFFFFF</color>
     <color name="icon_background">#14213D</color>
+    <!-- Matches the web app's --primary navy (bg-primary header) -->
+    <color name="status_bar_navy">#003F87</color>
 </resources>
