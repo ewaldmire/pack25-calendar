@@ -118,13 +118,21 @@ Backup files are a plain JSON array in the same shape `GET /api/events` returns.
 restore them into a **fresh/empty** database via the API:
 
 ```bash
+# Set this to whichever instance you're restoring into — the disposable dev
+# container above (http://localhost:3000) for a test restore, or the real
+# deployment for an actual disaster-recovery restore. The login cookie is
+# scoped to whatever host you log into, so both commands below must target
+# the SAME url — logging into localhost and then posting to production (or
+# vice versa) will fail with "Authentication required", not restore anything.
+TARGET_URL=http://localhost:3000
+
 # 1. Log in as a leader and save the session cookie
-curl -c cookies.txt -X POST https://calendar.pack25mahomet.com/api/auth/login \
+curl -c cookies.txt -X POST "$TARGET_URL/api/auth/login" \
   -H 'Content-Type: application/json' \
   -d '{"password":"YOUR_LEADER_PASSWORD"}'
 
 # 2. Wrap the backup array in {"records": [...]} and restore it in one batch
-curl -b cookies.txt -X POST https://calendar.pack25mahomet.com/api/events/bulk \
+curl -b cookies.txt -X POST "$TARGET_URL/api/events/bulk" \
   -H 'Content-Type: application/json' \
   --data "$(jq -n --slurpfile e pack25-events-20260813-175240.json '{records: $e[0]}')"
 ```
