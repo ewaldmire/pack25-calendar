@@ -1,0 +1,231 @@
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { base44 } from "@/api/base44Client";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
+} from "@/components/ui/alert-dialog";
+import { format } from "date-fns";
+import { Plus, Calendar as CalendarIcon, List, Printer, ChevronLeft, ChevronRight, Upload, Loader2 } from "lucide-react";
+
+import EventForm from "@/components/calendar/EventForm";
+import EventList from "@/components/calendar/EventList";
+import CalendarGrid from "@/components/calendar/CalendarGrid";
+import FilterBar from "@/components/calendar/FilterBar";
+import UploadEvents from "@/components/calendar/UploadEvents";
+import EventModal from "@/components/calendar/EventModal";
+import { cn } from "@/lib/utils";
+import { generateRecurrenceDates } from "@/lib/recurring";
+
+export default function Home() {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState("calendar");
+  const [selectedDens, setSelectedDens] = useState([]);
+  const [monthDate, setMonthDate] = useState(new Date());
+  const [formOpen, setFormOpen] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [modalEvent, setModalEvent] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const { toast } = useToast();
+
+  const loadEvents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await base44.entities.Event.list();
+      setEvents(data);
+    } catch (err) {
+      toast({ variant: "destructive", title: "Could not load events", description: err.message });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => { loadEvents(); }, [loadEvents]);
+
+  const filteredEvents = useMemo(() => {
+    if (selectedDens.length === 0) return events;
+    return events.filter(ev => ev.dens && ev.dens.some(d => selectedDens.includes(d)));
+  }, [events, selectedDens]);
+
+  const monthEvents = useMemo(() => {
+    if (view !== "calendar") return filteredEvents;
+    const y = monthDate.getFullYear();
+    const m = monthDate.getMonth();
+    return filteredEvents.filter(ev => {
+      if (!ev.date) return false;
+      const d = new Date(ev.date);
+      return d.getFullYear() === y && d.getMonth() === m;
+    });
+  }, [filteredEvents, monthDate, view]);
+
+  const toggleDen = (den) => {
+    setSelectedDens(prev => prev.includes(den) ? prev.filter(d => d !== den) : [...prev, den]);
+  };
+
+  const handleSave = async (form) => {
+    const { recurrence_type, recurrence_interval, recurrence_end_date, ...base } = form;
+    const cleanBase = {
+      name: base.name, date: base.date, end_date: base.end_date || "", start_time: base.start_time, end_time: base.end_time,
+      location: base.location, details: base.details, dens: base.dens
+    };
+    if (editingEvent) {
+      await base44.entities.Event.update(editingEvent.id, cleanBase);
+      toast({ title: "Event updated" });
+    } else if (recurrence_type !== "none" && recurrence_end_date) {
+      const dates = generateRecurrenceDates(base.date, recurrence_type, recurrence_interval || 1, recurrence_end_date);
+      const records = dates.map(d => ({ ...cleanBase, date: d }));
+      await base44.entities.Event.bulkCreate(records);
+      toast({ title: `${dates.length} recurring events added` });
+    } else {
+      await base44.entities.Event.create(cleanBase);
+      toast({ title: "Event added" });
+    }
+    setEditingEvent(null);
+    await loadEvents();
+  };
+
+  const handleEdit = (ev) => { setEditingEvent(ev); setFormOpen(true); };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await base44.entities.Event.delete(deleteTarget.id);
+      toast({ title: "Event deleted" });
+      setDeleteTarget(null);
+      await loadEvents();
+    } catch (err) {
+      toast({ variant: "destructive", title: "Delete failed", description: err.message });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const openNew = () => { setEditingEvent(null); setFormOpen(true); };
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border print:hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">CS</div>
+            <div>
+              <h1 className="font-bold text-base sm:text-lg leading-tight">Cub Scout Pack Calendar</h1>
+              <p className="text-xs text-muted-foreground leading-tight hidden sm:block">Plan, filter & print pack events</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setUploadOpen(true)} className="hidden sm:flex">
+              <Upload className="w-4 h-4 mr-1.5" /> Import
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              <Printer className="w-4 h-4 mr-1.5" /> Print
+            </Button>
+            <Button size="sm" onClick={openNew}>
+              <Plus className="w-4 h-4 mr-1.5" /> Add Event
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
+        {/* Print-only header */}
+        <div className="hidden print:block mb-4">
+          <h1 className="text-2xl font-bold">Cub Scout Pack Calendar</h1>
+          <p className="text-sm text-muted-foreground">{view === "calendar" ? format(monthDate, "MMMM yyyy") : "All Events"}</p>
+        </div>
+
+        {/* Controls */}
+        <div className="flex flex-col gap-4 print:hidden">
+          <FilterBar
+            selectedDens={selectedDens}
+            onToggleDen={toggleDen}
+            onAll={() => setSelectedDens([])}
+            onClear={() => setSelectedDens([])}
+          />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {view === "calendar" ? (
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" onClick={() => setMonthDate(new Date(monthDate.getFullYear(), monthDate.getMonth() - 1, 1))}>
+                  <ChevronLeft className="w-5 h-5" />
+                </Button>
+                <h2 className="text-lg font-semibold w-44 text-center">{format(monthDate, "MMMM yyyy")}</h2>
+                <Button variant="ghost" size="icon" onClick={() => setMonthDate(new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 1))}>
+                  <ChevronRight className="w-5 h-5" />
+                </Button>
+                <Button variant="outline" size="sm" className="ml-1" onClick={() => setMonthDate(new Date())}>Today</Button>
+              </div>
+            ) : (
+              <h2 className="text-lg font-semibold">All Events</h2>
+            )}
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => setUploadOpen(true)} className="sm:hidden">
+                <Upload className="w-4 h-4 mr-1.5" /> Import
+              </Button>
+              <div className="flex rounded-lg border border-border overflow-hidden">
+                <button
+                  onClick={() => setView("calendar")}
+                  className={cn("flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors", view === "calendar" ? "bg-foreground text-background" : "hover:bg-accent")}
+                >
+                  <CalendarIcon className="w-4 h-4" /> Calendar
+                </button>
+                <button
+                  onClick={() => setView("list")}
+                  className={cn("flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-l border-border", view === "list" ? "bg-foreground text-background" : "hover:bg-accent")}
+                >
+                  <List className="w-4 h-4" /> List
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="mt-5">
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : view === "calendar" ? (
+            <CalendarGrid
+              events={monthEvents}
+              monthDate={monthDate}
+              onEventClick={setModalEvent}
+              onDayClick={(dateStr) => { setEditingEvent(null); setFormOpen(true); }}
+            />
+          ) : (
+            <EventList
+              events={filteredEvents}
+              onEdit={handleEdit}
+              onDelete={setDeleteTarget}
+              onEventClick={setModalEvent}
+            />
+          )}
+        </div>
+      </main>
+
+      <EventForm open={formOpen} onOpenChange={(o) => { setFormOpen(o); if (!o) setEditingEvent(null); }} onSave={handleSave} editingEvent={editingEvent} />
+      <UploadEvents open={uploadOpen} onOpenChange={setUploadOpen} onImported={loadEvents} />
+      <EventModal event={modalEvent} onOpenChange={setModalEvent} onEdit={handleEdit} onDelete={setDeleteTarget} />
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete event?</AlertDialogTitle>
+            <AlertDialogDescription>This will permanently remove "{deleteTarget?.name}". This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
