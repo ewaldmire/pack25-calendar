@@ -73,6 +73,9 @@ export function registerEventRoutes(app) {
     if (!Array.isArray(records) || records.length === 0) {
       return res.status(400).json({ error: "records must be a non-empty array" });
     }
+    if (records.length > 5000) {
+      return res.status(400).json({ error: "Too many records in one batch (max 5000)" });
+    }
     const parsedRecords = [];
     for (const record of records) {
       const parsed = eventSchema.safeParse(record);

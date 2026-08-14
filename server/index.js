@@ -22,7 +22,9 @@ const app = express();
 // instead of Traefik's).
 app.set("trust proxy", 1);
 app.use(helmet());
-app.use(express.json());
+// Default 100kb is too tight for /api/events/bulk restores — a few
+// thousand events at ~300 bytes each comfortably fits in 2mb.
+app.use(express.json({ limit: "2mb" }));
 
 registerAuthRoutes(app);
 registerEventRoutes(app);
