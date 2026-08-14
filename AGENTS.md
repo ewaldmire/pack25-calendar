@@ -2,8 +2,8 @@
 
 ## Project Context
 
-This is a self-hosted Cub Scout pack calendar (originally scaffolded by Base44, since
-migrated off it entirely — there is no Base44 dependency or hosted backend anymore).
+This is a self-hosted Cub Scout pack calendar: a single Node/Express server serving a
+React frontend and a REST API backed by Postgres, with no third-party hosted backend.
 Treat it as user-owned application code, keep changes focused on the user's request, and
 preserve existing project conventions.
 
