@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
+import helmet from "helmet";
 
 // ical-generator's TZID formatting depends on the process's local timezone
 // getters (see server/calendar-feed.js) — pin it to UTC so the .ics feed is
@@ -16,6 +17,11 @@ const distDir = path.join(__dirname, "..", "dist");
 const PORT = process.env.PORT || 3000;
 
 const app = express();
+// Sits behind Traefik, so trust its X-Forwarded-For for req.ip (needed for
+// the login rate limiter in server/auth.js to key on the real client IP
+// instead of Traefik's).
+app.set("trust proxy", 1);
+app.use(helmet());
 app.use(express.json());
 
 registerAuthRoutes(app);
