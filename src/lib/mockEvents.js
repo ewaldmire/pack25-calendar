@@ -1,7 +1,7 @@
 import { addDays, format } from "date-fns";
 
-// In-memory + localStorage-backed stand-in for base44.entities.Event, used
-// in demo mode so the calendar has something to show with no backend.
+// In-memory + localStorage-backed stand-in for the events API, used in
+// demo mode so the calendar has something to show with no backend.
 const STORAGE_KEY = "pack25_demo_events";
 
 const iso = (date) => format(date, "yyyy-MM-dd");
