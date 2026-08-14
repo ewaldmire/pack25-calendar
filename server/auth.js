@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
+import rateLimit from "express-rate-limit";
 
 const COOKIE_NAME = "pack25_session";
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -65,8 +66,19 @@ export function requireAuth(req, res, next) {
   next();
 }
 
+// Guards the single shared leader password against brute-force guessing.
+// Keyed per-IP (see app.set("trust proxy", 1) in server/index.js) so one
+// abusive client can't lock out everyone else.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many login attempts. Try again later." },
+});
+
 export function registerAuthRoutes(app) {
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/login", loginLimiter, async (req, res) => {
     const { password } = req.body || {};
     if (typeof password !== "string" || !password) {
       return res.status(400).json({ error: "Password is required" });
