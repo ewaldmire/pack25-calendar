@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
 import { Plus, Calendar as CalendarIcon, List, Printer, ChevronLeft, ChevronRight, Loader2, CalendarPlus, LogIn, LogOut } from "lucide-react";
+import cubScoutsLogo from "@/assets/cub-scouts-logo.png";
 
 import EventForm from "@/components/calendar/EventForm";
 import EventList from "@/components/calendar/EventList";
@@ -119,7 +120,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <img
-              src="https://www.pack25mahomet.com/assets/cub-scouts-logo.png"
+              src={cubScoutsLogo}
               alt="Pack 25 Mahomet"
               className="w-9 h-9 rounded-lg object-contain shadow-sm"
             />
