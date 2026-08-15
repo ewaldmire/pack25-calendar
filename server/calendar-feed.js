@@ -1,4 +1,5 @@
 import ical from "ical-generator";
+import { getVtimezoneComponent } from "@touch4it/ical-timezones";
 import { pool } from "./db.js";
 import { DENS, DEN_MAP } from "../src/lib/dens.js";
 
@@ -40,7 +41,16 @@ export function registerCalendarFeed(app) {
     const calendarName = requestedDens.length > 0
       ? `Pack 25 Calendar — ${requestedDens.map((d) => DEN_MAP[d]?.label || d).join(", ")}`
       : "Pack 25 Calendar";
-    const calendar = ical({ name: calendarName, timezone: TIMEZONE, ttl: 60 * 60 });
+    // Without a VTIMEZONE block, correctness across a DST transition relies
+    // entirely on the receiving client already knowing "America/Chicago"'s
+    // DST rules itself — most do, but it's not RFC5545-guaranteed. Emitting
+    // one (via ical-timezones, per ical-generator's own recommendation)
+    // makes it explicit instead of implicit.
+    const calendar = ical({
+      name: calendarName,
+      timezone: { name: TIMEZONE, generator: getVtimezoneComponent },
+      ttl: 60 * 60,
+    });
 
     for (const row of result.rows) {
       const isAllDay = !row.start_time;
