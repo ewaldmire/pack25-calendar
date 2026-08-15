@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Event } from "@/api/eventsClient";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
@@ -28,6 +29,7 @@ export default function Home() {
   const [view, setView] = useState("calendar");
   const [selectedDens, setSelectedDens] = useState([]);
   const [monthDate, setMonthDate] = useState(new Date());
+  const [showPastEvents, setShowPastEvents] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [subscribeOpen, setSubscribeOpen] = useState(false);
@@ -67,6 +69,12 @@ export default function Home() {
       return d.getFullYear() === y && d.getMonth() === m;
     });
   }, [filteredEvents, monthDate, view]);
+
+  const listEvents = useMemo(() => {
+    if (showPastEvents) return filteredEvents;
+    const todayStr = format(new Date(), "yyyy-MM-dd");
+    return filteredEvents.filter(ev => (ev.end_date || ev.date) >= todayStr);
+  }, [filteredEvents, showPastEvents]);
 
   const toggleDen = (den) => {
     setSelectedDens(prev => prev.includes(den) ? prev.filter(d => d !== den) : [...prev, den]);
@@ -159,7 +167,7 @@ export default function Home() {
         {/* Print-only header */}
         <div className="hidden print:block mb-4">
           <h1 className="text-2xl font-bold">Pack 25 Mahomet</h1>
-          <p className="text-sm text-muted-foreground">{view === "calendar" ? format(monthDate, "MMMM yyyy") : "All Events"}</p>
+          <p className="text-sm text-muted-foreground">{view === "calendar" ? format(monthDate, "MMMM yyyy") : (showPastEvents ? "All Events" : "Upcoming Events")}</p>
         </div>
 
         {/* Controls */}
@@ -183,7 +191,13 @@ export default function Home() {
                 <Button variant="outline" size="sm" className="ml-1" onClick={() => setMonthDate(new Date())}>Today</Button>
               </div>
             ) : (
-              <h2 className="text-lg font-semibold">All Events</h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg font-semibold">{showPastEvents ? "All Events" : "Upcoming Events"}</h2>
+                <label className="flex items-center gap-1.5 text-sm text-muted-foreground cursor-pointer print:hidden">
+                  <Checkbox checked={showPastEvents} onCheckedChange={(checked) => setShowPastEvents(!!checked)} />
+                  Show past events
+                </label>
+              </div>
             )}
             <div className="flex items-center gap-2">
               <div className="flex rounded-lg border border-border overflow-hidden">
@@ -219,7 +233,7 @@ export default function Home() {
             />
           ) : (
             <EventList
-              events={filteredEvents}
+              events={listEvents}
               onEdit={handleEdit}
               onDelete={setDeleteTarget}
               onEventClick={setModalEvent}
