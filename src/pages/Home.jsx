@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Event } from "@/api/eventsClient";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from "@/components/ui/alert-dialog";
-import { format } from "date-fns";
+import { format, addDays, parseISO } from "date-fns";
 import { Plus, Calendar as CalendarIcon, List, Printer, ChevronLeft, ChevronRight, Loader2, CalendarPlus, LogIn, LogOut } from "lucide-react";
 import cubScoutsLogo from "@/assets/cub-scouts-logo.png";
 
@@ -29,7 +29,8 @@ export default function Home() {
   const [view, setView] = useState("calendar");
   const [selectedDens, setSelectedDens] = useState([]);
   const [monthDate, setMonthDate] = useState(new Date());
-  const [showPastEvents, setShowPastEvents] = useState(false);
+  const [listFrom, setListFrom] = useState(() => format(new Date(), "yyyy-MM-dd"));
+  const [listTo, setListTo] = useState(() => format(addDays(new Date(), 90), "yyyy-MM-dd"));
   const [formOpen, setFormOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [subscribeOpen, setSubscribeOpen] = useState(false);
@@ -71,10 +72,18 @@ export default function Home() {
   }, [filteredEvents, monthDate, view]);
 
   const listEvents = useMemo(() => {
-    if (showPastEvents) return filteredEvents;
-    const todayStr = format(new Date(), "yyyy-MM-dd");
-    return filteredEvents.filter(ev => (ev.end_date || ev.date) >= todayStr);
-  }, [filteredEvents, showPastEvents]);
+    return filteredEvents.filter(ev => {
+      const end = ev.end_date || ev.date;
+      return end >= listFrom && ev.date <= listTo;
+    });
+  }, [filteredEvents, listFrom, listTo]);
+
+  // Native date inputs fire onChange with incomplete values while the user
+  // is still typing (e.g. after only the month digits), so this must
+  // tolerate anything short of a full yyyy-MM-dd string instead of crashing
+  // on parseISO.
+  const formatListDate = (dateStr) =>
+    /^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? format(parseISO(dateStr), "MMM d, yyyy") : dateStr;
 
   const toggleDen = (den) => {
     setSelectedDens(prev => prev.includes(den) ? prev.filter(d => d !== den) : [...prev, den]);
@@ -167,7 +176,11 @@ export default function Home() {
         {/* Print-only header */}
         <div className="hidden print:block mb-4">
           <h1 className="text-2xl font-bold">Pack 25 Mahomet</h1>
-          <p className="text-sm text-muted-foreground">{view === "calendar" ? format(monthDate, "MMMM yyyy") : (showPastEvents ? "All Events" : "Upcoming Events")}</p>
+          <p className="text-sm text-muted-foreground">
+            {view === "calendar"
+              ? format(monthDate, "MMMM yyyy")
+              : `${formatListDate(listFrom)} – ${formatListDate(listTo)}`}
+          </p>
         </div>
 
         {/* Controls */}
@@ -191,12 +204,24 @@ export default function Home() {
                 <Button variant="outline" size="sm" className="ml-1" onClick={() => setMonthDate(new Date())}>Today</Button>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <h2 className="text-lg font-semibold">{showPastEvents ? "All Events" : "Upcoming Events"}</h2>
-                <label className="flex items-center gap-1.5 text-sm text-muted-foreground cursor-pointer print:hidden">
-                  <Checkbox checked={showPastEvents} onCheckedChange={(checked) => setShowPastEvents(!!checked)} />
-                  Show past events
-                </label>
+              <div className="flex flex-wrap items-center gap-2 print:hidden">
+                <Input
+                  type="date"
+                  value={listFrom}
+                  max={listTo}
+                  onChange={e => setListFrom(e.target.value)}
+                  className="w-auto"
+                  aria-label="From date"
+                />
+                <span className="text-muted-foreground text-sm">to</span>
+                <Input
+                  type="date"
+                  value={listTo}
+                  min={listFrom}
+                  onChange={e => setListTo(e.target.value)}
+                  className="w-auto"
+                  aria-label="To date"
+                />
               </div>
             )}
             <div className="flex items-center gap-2">
