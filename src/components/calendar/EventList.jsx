@@ -5,7 +5,12 @@ import { formatTimeRange } from "@/lib/timeFormat";
 import { formatDateRange } from "@/lib/recurring";
 
 export default function EventList({ events, onEdit, onDelete, onEventClick, canEdit }) {
-  const sorted = [...events].sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  const sorted = [...events].sort((a, b) => {
+    const dateCmp = (a.date || "").localeCompare(b.date || "");
+    if (dateCmp !== 0) return dateCmp;
+    // All-day events (no start_time) sort before timed events on the same day.
+    return (a.start_time || "").localeCompare(b.start_time || "");
+  });
 
   return (
     <div className="space-y-3">

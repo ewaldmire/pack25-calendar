@@ -26,6 +26,10 @@ export default function CalendarGrid({ events, monthDate, onEventClick, onDayCli
       eventsByDay[key].push(ev);
     });
   });
+  // All-day events (no start_time) sort before timed events on the same day.
+  Object.values(eventsByDay).forEach(dayEvents => {
+    dayEvents.sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""));
+  });
 
   return (
     <div className="rounded-xl border border-border overflow-hidden bg-card print:border-0">
