@@ -1,5 +1,5 @@
 import React from "react";
-import { DEN_MAP, MULTI_DEN_STYLE } from "@/lib/dens";
+import { DEN_MAP, MULTI_DEN_STYLE, getEventDens } from "@/lib/dens";
 import { formatTime } from "@/lib/timeFormat";
 import { getEventDates } from "@/lib/recurring";
 import { cn } from "@/lib/utils";
@@ -63,7 +63,7 @@ export default function CalendarGrid({ events, monthDate, onEventClick, onDayCli
               </div>
               <div className="flex flex-col gap-1 overflow-hidden">
                 {dayEvents.slice(0, 3).map(ev => {
-                  const dens = ev.dens && ev.dens.length ? ev.dens : ["leaders"];
+                  const dens = getEventDens(ev);
                   const firstDen = DEN_MAP[dens[0]] || DEN_MAP.leaders;
                   const pillStyle = dens.length > 1
                     ? MULTI_DEN_STYLE

@@ -3,14 +3,14 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { DEN_MAP } from "@/lib/dens";
+import { DEN_MAP, getEventDens } from "@/lib/dens";
 import { Calendar, Clock, MapPin, Pencil, Trash2 } from "lucide-react";
 import { formatTimeRange } from "@/lib/timeFormat";
 import { formatDateRange } from "@/lib/recurring";
 
 export default function EventModal({ event, onOpenChange, onEdit, onDelete, canEdit }) {
   if (!event) return null;
-  const dens = event.dens && event.dens.length ? event.dens : ["leaders"];
+  const dens = getEventDens(event);
 
   return (
     <Dialog open={!!event} onOpenChange={onOpenChange}>

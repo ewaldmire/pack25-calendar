@@ -7,19 +7,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose
 } from "@/components/ui/dialog";
-import { DENS } from "@/lib/dens";
+import { KID_DENS, DEN_MAP, hasAllKidDens } from "@/lib/dens";
 import { ordinalWeekdayLabel } from "@/lib/recurring";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_LOCATION = "Lincoln Trail Cafeteria";
 const DEFAULT_START_TIME = "18:30"; // 6:30 PM — most pack events are evening
 const DEFAULT_END_TIME = "19:30"; // 7:30 PM
-
-// Leaders isn't a "den" of kids — a real den meeting always has its
-// leaders there too, so "Tigers + Leaders" never needs to be its own
-// combination. Leaders Only is mutually exclusive with the 6 kid dens.
-const KID_DENS = DENS.filter(d => d.value !== "leaders");
-const LEADERS_DEN = DENS.find(d => d.value === "leaders");
+const LEADERS_DEN = DEN_MAP.leaders;
 
 export default function EventForm({ open, onOpenChange, onSave, editingEvent }) {
   const [form, setForm] = useState({
@@ -83,7 +78,7 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
     setDensError(false);
   };
 
-  const allKidDensSelected = KID_DENS.every(d => form.dens.includes(d.value));
+  const allKidDensSelected = hasAllKidDens(form.dens);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

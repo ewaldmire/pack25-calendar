@@ -1,11 +1,9 @@
 import React from "react";
-import { DEN_MAP, DENS } from "@/lib/dens";
+import { DEN_MAP, getEventDens, hasAllKidDens } from "@/lib/dens";
 import { Pencil, Trash2, MapPin, Clock, Calendar } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { formatTimeRange } from "@/lib/timeFormat";
 import { formatDateRange } from "@/lib/recurring";
-
-const CORE_DEN_COUNT = DENS.filter(d => d.value !== "leaders").length;
 
 // Compact for a printed reference sheet — no weekday/year, since those
 // take real estate a binder page doesn't have to spare.
@@ -28,7 +26,7 @@ function printDateRange(dateStr, endDateStr) {
 const MUTED_DEN_COLOR = "#D1D5DB";
 
 function printDensList(dens) {
-  if (dens.length >= CORE_DEN_COUNT && dens.every(d => d !== "leaders")) {
+  if (hasAllKidDens(dens)) {
     return [{ label: "All Dens", color: DEN_MAP.leaders.color }];
   }
   return dens.map(d => ({
@@ -74,7 +72,7 @@ export default function EventList({ events, onEdit, onDelete, onEventClick, canE
           </thead>
           <tbody>
             {sorted.map(ev => {
-              const dens = ev.dens && ev.dens.length ? ev.dens : ["leaders"];
+              const dens = getEventDens(ev);
               return (
                 <tr key={ev.id} className="border-b border-border print:break-inside-avoid align-top">
                   <td className="py-1 pr-2">{printDateRange(ev.date, ev.end_date)}</td>
@@ -103,7 +101,7 @@ export default function EventList({ events, onEdit, onDelete, onEventClick, canE
 
       <div className="space-y-3 print:hidden">
       {sorted.map(ev => {
-        const dens = ev.dens && ev.dens.length ? ev.dens : ["leaders"];
+        const dens = getEventDens(ev);
         return (
           <div
             key={ev.id}
