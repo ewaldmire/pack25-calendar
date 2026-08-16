@@ -9,10 +9,17 @@ import {
 } from "@/components/ui/dialog";
 import { DENS } from "@/lib/dens";
 import { ordinalWeekdayLabel } from "@/lib/recurring";
+import { cn } from "@/lib/utils";
 
 const DEFAULT_LOCATION = "Lincoln Trail Cafeteria";
 const DEFAULT_START_TIME = "18:30"; // 6:30 PM — most pack events are evening
 const DEFAULT_END_TIME = "19:30"; // 7:30 PM
+
+// Leaders isn't a "den" of kids — a real den meeting always has its
+// leaders there too, so "Tigers + Leaders" never needs to be its own
+// combination. Leaders Only is mutually exclusive with the 6 kid dens.
+const KID_DENS = DENS.filter(d => d.value !== "leaders");
+const LEADERS_DEN = DENS.find(d => d.value === "leaders");
 
 export default function EventForm({ open, onOpenChange, onSave, editingEvent }) {
   const [form, setForm] = useState({
@@ -54,14 +61,29 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
   };
 
   const toggleDen = (den) => {
-    setForm(f => ({
-      ...f,
-      dens: f.dens.includes(den)
-        ? f.dens.filter(d => d !== den)
-        : [...f.dens, den]
-    }));
+    setForm(f => {
+      if (den === "leaders") {
+        // Leaders Only is exclusive — selecting it clears any kid dens.
+        return { ...f, dens: f.dens.includes("leaders") ? [] : ["leaders"] };
+      }
+      // Selecting a kid den always drops Leaders Only, if present.
+      const withoutLeaders = f.dens.filter(d => d !== "leaders");
+      return {
+        ...f,
+        dens: withoutLeaders.includes(den)
+          ? withoutLeaders.filter(d => d !== den)
+          : [...withoutLeaders, den]
+      };
+    });
     setDensError(false);
   };
+
+  const selectAllKidDens = () => {
+    setForm(f => ({ ...f, dens: KID_DENS.map(d => d.value) }));
+    setDensError(false);
+  };
+
+  const allKidDensSelected = KID_DENS.every(d => form.dens.includes(d.value));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -163,8 +185,18 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
           </div>
           <div className="space-y-2">
             <Label>Assign to Dens *</Label>
+            <button
+              type="button"
+              onClick={selectAllKidDens}
+              className={cn(
+                "w-full text-sm font-medium rounded-lg border px-3 py-2 transition-colors",
+                allKidDensSelected ? "bg-foreground text-background border-foreground" : "border-border hover:bg-accent"
+              )}
+            >
+              All Dens
+            </button>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {DENS.map(d => (
+              {KID_DENS.map(d => (
                 <label key={d.value} className="flex items-center gap-2 min-w-0 rounded-lg border border-border px-3 py-2 cursor-pointer hover:bg-accent transition-colors">
                   <Checkbox
                     checked={form.dens.includes(d.value)}
@@ -175,6 +207,14 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
                 </label>
               ))}
             </div>
+            <label className="flex items-center gap-2 min-w-0 rounded-lg border border-border px-3 py-2 cursor-pointer hover:bg-accent transition-colors">
+              <Checkbox
+                checked={form.dens.includes("leaders")}
+                onCheckedChange={() => toggleDen("leaders")}
+              />
+              <span className="w-2.5 h-2.5 shrink-0 rounded-full" style={{ backgroundColor: LEADERS_DEN.color }} />
+              <span className="text-sm min-w-0">Leaders Only</span>
+            </label>
             {densError && (
               <p className="text-sm text-destructive">Select at least one den.</p>
             )}

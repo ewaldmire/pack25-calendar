@@ -18,7 +18,11 @@ const eventSchema = z.object({
   end_time: optionalText,
   location: optionalText,
   details: optionalText,
-  dens: z.array(z.enum(validDens)).min(1, "Select at least one den"),
+  dens: z.array(z.enum(validDens))
+    .min(1, "Select at least one den")
+    .refine((dens) => !(dens.includes("leaders") && dens.length > 1), {
+      message: "Leaders cannot be combined with other dens",
+    }),
 });
 
 // .partial() re-wraps each field in an outer ZodOptional, so an absent key
