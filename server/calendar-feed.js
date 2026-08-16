@@ -1,7 +1,7 @@
 import ical from "ical-generator";
 import { getVtimezoneComponent } from "@touch4it/ical-timezones";
 import { pool } from "./db.js";
-import { isValidDenValue, getDenInfo } from "../src/lib/dens.js";
+import { isValidDenValue } from "../src/lib/dens.js";
 
 const TIMEZONE = process.env.PACK_TIMEZONE || "America/Chicago";
 
@@ -24,19 +24,19 @@ function wallClockDateTime(dateStr, timeStr) {
   return new Date(Date.UTC(y, m - 1, d, h, min));
 }
 
-// dens.js's getDenInfo() defaults its reference date to `new Date()` read
-// through the process's *local* getters — correct in the browser (the
-// visitor's own clock), but on this server process.env.TZ is pinned to UTC
-// (see the comment above), so an un-dated getDenInfo(d) call here would
-// silently use the UTC calendar day instead of the pack's actual one. That
-// only ever differs for a few hours a day, but right around the June 1
-// rank cutover those few hours are exactly the ones that matter — this
-// computes "today" the same way a browser in Chicago would.
-function todayInTimezone(timeZone) {
-  const parts = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" })
-    .formatToParts(new Date());
-  const map = Object.fromEntries(parts.map((p) => [p.type, p.value]));
-  return `${map.year}-${map.month}-${map.day}`;
+// A rank name ("Wolves") would be accurate today but silently drift every
+// June 1, eventually degrading to a bare, unlabeled grad year once that
+// cohort ages out of the pack entirely — the same instability this whole
+// rekey was meant to eliminate, just relocated to the calendar's title.
+// "Class of $YEAR" is permanent: it never needs recomputing and never
+// stops making sense, so this needs no reference date at all.
+function calendarNameFor(requestedDens) {
+  if (requestedDens.length === 0) return "Pack 25 Calendar";
+  const gradYears = requestedDens.filter((d) => d !== "leaders").sort();
+  const parts = [];
+  if (gradYears.length > 0) parts.push(`Class of ${gradYears.join(", ")}`);
+  if (requestedDens.includes("leaders")) parts.push("Leaders");
+  return `Pack 25 Calendar — ${parts.join(", ")}`;
 }
 
 export function registerCalendarFeed(app) {
@@ -52,10 +52,7 @@ export function registerCalendarFeed(app) {
       ? await pool.query("SELECT * FROM events WHERE dens && $1::text[] ORDER BY date ASC", [requestedDens])
       : await pool.query("SELECT * FROM events ORDER BY date ASC");
 
-    const today = todayInTimezone(TIMEZONE);
-    const calendarName = requestedDens.length > 0
-      ? `Pack 25 Calendar — ${requestedDens.map((d) => getDenInfo(d, today)?.label || d).join(", ")}`
-      : "Pack 25 Calendar";
+    const calendarName = calendarNameFor(requestedDens);
     // Without a VTIMEZONE block, correctness across a DST transition relies
     // entirely on the receiving client already knowing "America/Chicago"'s
     // DST rules itself — most do, but it's not RFC5545-guaranteed. Emitting
