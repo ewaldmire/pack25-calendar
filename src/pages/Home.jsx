@@ -26,7 +26,7 @@ import { DEMO_MODE } from "@/lib/demoMode";
 export default function Home() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState("calendar");
+  const [view, setView] = useState("list");
   const [selectedDens, setSelectedDens] = useState([]);
   const [monthDate, setMonthDate] = useState(new Date());
   const [listFrom, setListFrom] = useState(() => format(new Date(), "yyyy-MM-dd"));
@@ -174,13 +174,16 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
         {/* Print-only header */}
-        <div className="hidden print:block mb-4">
-          <h1 className="text-2xl font-bold">Pack 25 Mahomet</h1>
-          <p className="text-sm text-muted-foreground">
-            {view === "calendar"
-              ? format(monthDate, "MMMM yyyy")
-              : `${formatListDate(listFrom)} – ${formatListDate(listTo)}`}
-          </p>
+        <div className="hidden print:flex items-start justify-between mb-4">
+          <div>
+            <h1 className="text-2xl font-bold">Pack 25 Mahomet</h1>
+            <p className="text-sm text-muted-foreground">
+              {view === "calendar"
+                ? format(monthDate, "MMMM yyyy")
+                : `${formatListDate(listFrom)} – ${formatListDate(listTo)}`}
+            </p>
+          </div>
+          <img src={cubScoutsLogo} alt="Pack 25 Mahomet" className="w-12 h-12 object-contain" />
         </div>
 
         {/* Controls */}
