@@ -23,10 +23,12 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
   });
   const [saving, setSaving] = useState(false);
   const [densError, setDensError] = useState(false);
+  const [recurrenceEndDateError, setRecurrenceEndDateError] = useState(false);
   const [allDay, setAllDay] = useState(false);
 
   useEffect(() => {
     setDensError(false);
+    setRecurrenceEndDateError(false);
     if (editingEvent) {
       setForm({
         name: editingEvent.name || "",
@@ -85,6 +87,10 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
     if (!form.name || !form.date) return;
     if (form.dens.length === 0) {
       setDensError(true);
+      return;
+    }
+    if (form.recurrence_type !== "none" && !form.recurrence_end_date) {
+      setRecurrenceEndDateError(true);
       return;
     }
     setSaving(true);
@@ -167,8 +173,16 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
                     </select>
                   </div>
                   <div className="space-y-2 min-w-0">
-                    <Label htmlFor="recurrence_end_date">Ends On</Label>
-                    <Input id="recurrence_end_date" type="date" value={form.recurrence_end_date} onChange={e => setForm({ ...form, recurrence_end_date: e.target.value })} />
+                    <Label htmlFor="recurrence_end_date">Ends On *</Label>
+                    <Input
+                      id="recurrence_end_date"
+                      type="date"
+                      value={form.recurrence_end_date}
+                      onChange={e => { setForm({ ...form, recurrence_end_date: e.target.value }); setRecurrenceEndDateError(false); }}
+                    />
+                    {recurrenceEndDateError && (
+                      <p className="text-sm text-destructive">An end date is required for a repeating event.</p>
+                    )}
                   </div>
                 </div>
               )}
