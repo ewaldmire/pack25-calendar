@@ -258,16 +258,16 @@ export default function Home() {
             <div className="flex items-center gap-2">
               <div className="flex rounded-lg border border-border overflow-hidden">
                 <button
-                  onClick={() => setView("calendar")}
-                  className={cn("flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors", view === "calendar" ? "bg-foreground text-background" : "hover:bg-accent")}
-                >
-                  <CalendarIcon className="w-4 h-4" /> Calendar
-                </button>
-                <button
                   onClick={() => setView("list")}
-                  className={cn("flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-l border-border", view === "list" ? "bg-foreground text-background" : "hover:bg-accent")}
+                  className={cn("flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors", view === "list" ? "bg-foreground text-background" : "hover:bg-accent")}
                 >
                   <List className="w-4 h-4" /> List
+                </button>
+                <button
+                  onClick={() => setView("calendar")}
+                  className={cn("flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-l border-border", view === "calendar" ? "bg-foreground text-background" : "hover:bg-accent")}
+                >
+                  <CalendarIcon className="w-4 h-4" /> Calendar
                 </button>
               </div>
             </div>
