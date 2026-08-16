@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/dialog";
 import { Copy, CalendarPlus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { DEN_MAP } from "@/lib/dens";
+import { getDenInfo } from "@/lib/dens";
 
 export default function SubscribeDialog({ open, onOpenChange, selectedDens = [] }) {
   const { toast } = useToast();
@@ -35,19 +35,28 @@ export default function SubscribeDialog({ open, onOpenChange, selectedDens = [] 
             Select the Den(s) you want before clicking the "Subscribe" button.
           </p>
 
-          {selectedDens.length > 0 && (
+          {selectedDens.length > 0 ? (
             <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
               <span>Only events for:</span>
-              {selectedDens.map((d) => (
-                <span
-                  key={d}
-                  className="font-semibold px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: DEN_MAP[d]?.bg, color: DEN_MAP[d]?.text }}
-                >
-                  {DEN_MAP[d]?.label || d}
-                </span>
-              ))}
+              {selectedDens.map((d) => {
+                const info = getDenInfo(d);
+                return (
+                  <span
+                    key={d}
+                    className="font-semibold px-2 py-0.5 rounded-full"
+                    style={{ backgroundColor: info?.bg, color: info?.text }}
+                  >
+                    {info?.label || d}
+                  </span>
+                );
+              })}
             </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              No dens selected above — this subscribes to <strong>every</strong> Pack 25 event,
+              including leader-only meetings. To leave those out, select the specific den(s)
+              you want first.
+            </p>
           )}
 
           <div className="space-y-2">

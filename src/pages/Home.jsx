@@ -7,7 +7,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from "@/components/ui/alert-dialog";
-import { format, addDays, parseISO } from "date-fns";
+import { format, addDays, parseISO, startOfMonth, endOfMonth } from "date-fns";
 import { Plus, Calendar as CalendarIcon, List, Printer, ChevronLeft, ChevronRight, Loader2, CalendarPlus, LogIn, LogOut } from "lucide-react";
 import cubScoutsLogo from "@/assets/cub-scouts-logo.png";
 
@@ -19,7 +19,7 @@ import EventModal from "@/components/calendar/EventModal";
 import LoginDialog from "@/components/calendar/LoginDialog";
 import SubscribeDialog from "@/components/calendar/SubscribeDialog";
 import { cn } from "@/lib/utils";
-import { KID_DENS, getEventDens } from "@/lib/dens";
+import { getEventDens } from "@/lib/dens";
 import { generateRecurrenceDates } from "@/lib/recurring";
 import { useAuth } from "@/lib/AuthContext";
 import { DEMO_MODE } from "@/lib/demoMode";
@@ -92,17 +92,19 @@ export default function Home() {
     });
   }, [filteredEvents, listFrom, listTo]);
 
-  // Explicit den list for the ICS subscribe link, mirroring whatever's
-  // currently being viewed. Default (nothing restricted) stays an empty
-  // array so the feed omits ?dens= entirely, same as before this toggle
-  // existed. Turning Leaders off with no kid-den restriction has to spell
-  // out all 6 kid dens explicitly — the feed has no other way to say
-  // "everything except Leaders".
+  // Explicit den list for the ICS subscribe link. With no kid-den
+  // restriction this always stays an empty array — an unfiltered
+  // subscription (no ?dens= at all) is the only way to guarantee it never
+  // goes stale, since dens are keyed by graduation year and a brand-new
+  // Lions cohort joins every fall; a frozen list of "today's 6 dens" would
+  // silently stop covering that new cohort's events by the next crossover.
+  // Leaders is deliberately not factored in here — the tradeoff is that a
+  // subscription with no den restriction always includes leader-only
+  // events too (the Subscribe dialog says as much); excluding leaders only
+  // works once specific dens are selected, since those stay valid forever.
   const subscribeDens = useMemo(() => {
-    const noKidRestriction = selectedKidDens.length === 0;
-    if (noKidRestriction && showLeaders) return [];
-    const kidPart = noKidRestriction ? KID_DENS.map(d => d.value) : selectedKidDens;
-    return showLeaders ? [...kidPart, "leaders"] : kidPart;
+    if (selectedKidDens.length === 0) return [];
+    return showLeaders ? [...selectedKidDens, "leaders"] : selectedKidDens;
   }, [selectedKidDens, showLeaders]);
 
   // Native date inputs fire onChange with incomplete values while the user
@@ -229,6 +231,8 @@ export default function Home() {
             onToggleLeaders={() => setShowLeaders(s => !s)}
             onAll={() => setSelectedKidDens([])}
             onClear={() => { setSelectedKidDens([]); setShowLeaders(true); }}
+            rangeStart={view === "calendar" ? format(startOfMonth(monthDate), "yyyy-MM-dd") : listFrom}
+            rangeEnd={view === "calendar" ? format(endOfMonth(monthDate), "yyyy-MM-dd") : listTo}
           />
           <div className="flex flex-wrap items-center justify-between gap-3">
             {view === "calendar" ? (

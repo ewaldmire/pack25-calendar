@@ -1,5 +1,5 @@
 import React from "react";
-import { DEN_MAP, getEventDens, hasAllKidDens } from "@/lib/dens";
+import { getDenInfo, getEventDens, hasAllKidDens, LEADERS } from "@/lib/dens";
 import { Pencil, Trash2, MapPin, Clock, Calendar } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { formatTimeRange } from "@/lib/timeFormat";
@@ -25,14 +25,17 @@ function printDateRange(dateStr, endDateStr) {
 // in the visual hierarchy.
 const MUTED_DEN_COLOR = "#D1D5DB";
 
-function printDensList(dens) {
-  if (hasAllKidDens(dens)) {
-    return [{ label: "All Dens", color: DEN_MAP.leaders.color }];
+function printDensList(dens, referenceDate) {
+  if (hasAllKidDens(dens, referenceDate)) {
+    return [{ label: "All Dens", color: LEADERS.color }];
   }
-  return dens.map(d => ({
-    label: DEN_MAP[d]?.label || d,
-    color: d === "leaders" ? MUTED_DEN_COLOR : DEN_MAP[d]?.color,
-  }));
+  return dens.map(d => {
+    const info = getDenInfo(d, referenceDate);
+    return {
+      label: info?.label || d,
+      color: d === "leaders" ? MUTED_DEN_COLOR : info?.color,
+    };
+  });
 }
 
 export default function EventList({ events, onEdit, onDelete, onEventClick, canEdit }) {
@@ -84,7 +87,7 @@ export default function EventList({ events, onEdit, onDelete, onEventClick, canE
                     {ev.details && <div className="font-normal text-muted-foreground">{ev.details}</div>}
                   </td>
                   <td className="py-1 pr-2">
-                    {printDensList(dens).map((d, i) => (
+                    {printDensList(dens, ev.date).map((d, i) => (
                       <div key={i} className="flex items-center gap-1">
                         <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
                         <span>{d.label}</span>
@@ -115,7 +118,7 @@ export default function EventList({ events, onEdit, onDelete, onEventClick, canE
                   </h3>
                   <div className="flex flex-wrap gap-1">
                     {dens.map(d => {
-                      const info = DEN_MAP[d];
+                      const info = getDenInfo(d, ev.date);
                       if (!info) return null;
                       return (
                         <span key={d} className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: info.bg, color: info.text }}>

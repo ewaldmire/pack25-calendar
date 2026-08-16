@@ -1,4 +1,5 @@
 import { addDays, format } from "date-fns";
+import { getActiveKidDens } from "@/lib/dens";
 
 // In-memory + localStorage-backed stand-in for the events API, used in
 // demo mode so the calendar has something to show with no backend.
@@ -8,17 +9,23 @@ const iso = (date) => format(date, "yyyy-MM-dd");
 
 const buildSeedEvents = () => {
   const today = new Date();
+  // Dens are graduation-year strings computed relative to today, not
+  // hardcoded rank slugs — so demo mode always shows correctly-ranked/
+  // colored dens no matter when someone runs it. Order matches rank order:
+  // Lion, Tiger, Wolf, Bear, Webelos, AOL.
+  const [lions, tigers, wolves, bears, webelos, aols] = getActiveKidDens().map((d) => d.value);
+  const allKidDens = [lions, tigers, wolves, bears, webelos, aols];
   return [
-    { name: "Pack Meeting", date: iso(addDays(today, 2)), start_time: "18:00", end_time: "19:30", location: "Community Center", details: "Monthly all-pack meeting with awards.", dens: ["lions", "tigers", "wolves", "bears", "webelos", "aols"] },
-    { name: "Lions Den Meeting", date: iso(addDays(today, 4)), start_time: "17:30", end_time: "18:30", location: "School Cafeteria", details: "Weekly den meeting.", dens: ["lions"] },
+    { name: "Pack Meeting", date: iso(addDays(today, 2)), start_time: "18:00", end_time: "19:30", location: "Community Center", details: "Monthly all-pack meeting with awards.", dens: allKidDens },
+    { name: "Lions Den Meeting", date: iso(addDays(today, 4)), start_time: "17:30", end_time: "18:30", location: "School Cafeteria", details: "Weekly den meeting.", dens: [lions] },
     { name: "Leader Planning Meeting", date: iso(addDays(today, 5)), start_time: "19:00", end_time: "20:00", location: "Leader's House", details: "Plan next quarter's activities.", dens: ["leaders"] },
-    { name: "Webelos Den Meeting", date: iso(addDays(today, 6)), start_time: "18:30", end_time: "19:30", location: "School Cafeteria", details: "", dens: ["webelos"] },
-    { name: "Tigers Nature Hike", date: iso(addDays(today, 8)), start_time: "09:00", end_time: "11:00", location: "Riverside Trailhead", details: "Bring water and closed-toe shoes.", dens: ["tigers"] },
-    { name: "Popcorn Kickoff", date: iso(addDays(today, 10)), start_time: "10:00", end_time: "12:00", location: "Park Pavilion", details: "Kick off the fall popcorn sale.", dens: ["lions", "tigers", "wolves", "bears", "webelos", "aols"] },
-    { name: "Bears Service Project", date: iso(addDays(today, 12)), start_time: "09:00", end_time: "11:30", location: "Town Park", details: "Trail cleanup with the Bears den.", dens: ["bears"] },
-    { name: "Fall Campout Weekend", date: iso(addDays(today, 14)), end_date: iso(addDays(today, 16)), start_time: "16:00", end_time: "", location: "Camp Wildwood", details: "Overnight campout, all dens welcome.", dens: ["lions", "tigers", "wolves", "bears", "webelos", "aols"] },
-    { name: "Pinewood Derby", date: iso(addDays(today, 21)), start_time: "09:00", end_time: "13:00", location: "School Gym", details: "Bring your finished cars by 8:45am for check-in.", dens: ["lions", "tigers", "wolves", "bears", "webelos", "aols"] },
-    { name: "AOL Bridging Ceremony", date: iso(addDays(today, 30)), start_time: "18:00", end_time: "19:00", location: "Community Center", details: "Celebrating our Arrow of Light scouts.", dens: ["aols", "webelos"] },
+    { name: "Webelos Den Meeting", date: iso(addDays(today, 6)), start_time: "18:30", end_time: "19:30", location: "School Cafeteria", details: "", dens: [webelos] },
+    { name: "Tigers Nature Hike", date: iso(addDays(today, 8)), start_time: "09:00", end_time: "11:00", location: "Riverside Trailhead", details: "Bring water and closed-toe shoes.", dens: [tigers] },
+    { name: "Popcorn Kickoff", date: iso(addDays(today, 10)), start_time: "10:00", end_time: "12:00", location: "Park Pavilion", details: "Kick off the fall popcorn sale.", dens: allKidDens },
+    { name: "Bears Service Project", date: iso(addDays(today, 12)), start_time: "09:00", end_time: "11:30", location: "Town Park", details: "Trail cleanup with the Bears den.", dens: [bears] },
+    { name: "Fall Campout Weekend", date: iso(addDays(today, 14)), end_date: iso(addDays(today, 16)), start_time: "16:00", end_time: "", location: "Camp Wildwood", details: "Overnight campout, all dens welcome.", dens: allKidDens },
+    { name: "Pinewood Derby", date: iso(addDays(today, 21)), start_time: "09:00", end_time: "13:00", location: "School Gym", details: "Bring your finished cars by 8:45am for check-in.", dens: allKidDens },
+    { name: "AOL Bridging Ceremony", date: iso(addDays(today, 30)), start_time: "18:00", end_time: "19:00", location: "Community Center", details: "Celebrating our Arrow of Light scouts.", dens: [aols, webelos] },
   ].map((event, index) => ({ id: `seed-${index}`, ...event }));
 };
 

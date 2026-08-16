@@ -7,14 +7,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose
 } from "@/components/ui/dialog";
-import { KID_DENS, DEN_MAP, hasAllKidDens } from "@/lib/dens";
+import { getActiveKidDens, hasAllKidDens, LEADERS } from "@/lib/dens";
 import { ordinalWeekdayLabel } from "@/lib/recurring";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_LOCATION = "Lincoln Trail Cafeteria";
 const DEFAULT_START_TIME = "18:30"; // 6:30 PM — most pack events are evening
 const DEFAULT_END_TIME = "19:30"; // 7:30 PM
-const LEADERS_DEN = DEN_MAP.leaders;
+const LEADERS_DEN = LEADERS;
 
 export default function EventForm({ open, onOpenChange, onSave, editingEvent }) {
   const [form, setForm] = useState({
@@ -75,12 +75,19 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
     setDensError(false);
   };
 
+  // The active kid-den roster is computed relative to this event's own
+  // date, not today — so scheduling a meeting for after an upcoming June 1
+  // crossover already shows the post-crossover roster. All three of these
+  // (picker, "All Dens" shortcut, and its lit-up state) must share the same
+  // reference date, or the button can visibly disagree with what's checked.
+  const activeKidDens = getActiveKidDens(form.date || undefined);
+
   const selectAllKidDens = () => {
-    setForm(f => ({ ...f, dens: KID_DENS.map(d => d.value) }));
+    setForm(f => ({ ...f, dens: activeKidDens.map(d => d.value) }));
     setDensError(false);
   };
 
-  const allKidDensSelected = hasAllKidDens(form.dens);
+  const allKidDensSelected = hasAllKidDens(form.dens, form.date || undefined);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -205,7 +212,7 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
               All Dens
             </button>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {KID_DENS.map(d => (
+              {activeKidDens.map(d => (
                 <label key={d.value} className="flex items-center gap-2 min-w-0 rounded-lg border border-border px-3 py-2 cursor-pointer hover:bg-accent transition-colors">
                   <Checkbox
                     checked={form.dens.includes(d.value)}
