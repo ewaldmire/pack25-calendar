@@ -82,8 +82,19 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
   // reference date, or the button can visibly disagree with what's checked.
   const activeKidDens = getActiveKidDens(form.date || undefined);
 
+  // Values already on this event that aren't part of the picker above —
+  // a cohort already graduated out, or (like inviting next fall's
+  // incoming Lions to a summer event) not yet joined as of this date.
+  // Editing used to just make these silently disappear from the form
+  // while leaving them saved underneath, which is exactly how a stray den
+  // ends up on an event with nobody around who could see or remove it —
+  // show them instead, so a leader can see and deliberately keep or clear
+  // whatever's actually stored.
+  const activeValues = new Set(activeKidDens.map(d => d.value));
+  const staleDens = form.dens.filter(d => d !== "leaders" && !activeValues.has(d));
+
   const selectAllKidDens = () => {
-    setForm(f => ({ ...f, dens: activeKidDens.map(d => d.value) }));
+    setForm(f => ({ ...f, dens: [...activeKidDens.map(d => d.value), ...staleDens] }));
     setDensError(false);
   };
 
@@ -231,6 +242,19 @@ export default function EventForm({ open, onOpenChange, onSave, editingEvent }) 
               <span className="w-2.5 h-2.5 shrink-0 rounded-full" style={{ backgroundColor: LEADERS_DEN.color }} />
               <span className="text-sm min-w-0">Leaders Only</span>
             </label>
+            {staleDens.length > 0 && (
+              <div className="space-y-2 pt-1">
+                <p className="text-xs text-muted-foreground">
+                  Also assigned — not part of the pack's regular roster on this date (already graduated, or not yet joined):
+                </p>
+                {staleDens.map(d => (
+                  <label key={d} className="flex items-center gap-2 min-w-0 rounded-lg border border-dashed border-muted-foreground/40 px-3 py-2 cursor-pointer hover:bg-accent transition-colors">
+                    <Checkbox checked onCheckedChange={() => toggleDen(d)} />
+                    <span className="text-sm min-w-0 text-muted-foreground">Class of {d}</span>
+                  </label>
+                ))}
+              </div>
+            )}
             {densError && (
               <p className="text-sm text-destructive">Select at least one den.</p>
             )}

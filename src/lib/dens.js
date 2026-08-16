@@ -18,7 +18,7 @@ const RANK_COLORS = [
   { color: "#78350F", bg: "#F3E8DA", text: "#451A03" }, // Arrow of Light
 ];
 
-export const LEADERS = { value: "leaders", label: "Leaders", color: "#404040", bg: "#E5E5E5", text: "#262626" };
+export const LEADERS = { value: "leaders", label: "Leaders", color: "#404040", bg: "#E5E5E5", text: "#262626", rank: -1 };
 
 // Ranks roll over June 1 each year (matches the pack's real crossover-
 // ceremony timing, not the fall program start) — June 1 itself is already
@@ -73,7 +73,21 @@ export function getDenInfo(value, referenceDate) {
   const gradYear = Number(value);
   const offset = packYear(resolveReferenceDate(referenceDate)) - lionYearFor(gradYear);
   if (offset < 0 || offset > 5) return null;
-  return { value, label: RANK_LABELS[offset], ...RANK_COLORS[offset] };
+  return { value, label: RANK_LABELS[offset], ...RANK_COLORS[offset], rank: offset };
+}
+
+// Stable Lion -> AOL display order for a list of den values on one event —
+// the stored array order is just whatever order they were checked/
+// inserted in, which carries no meaning. Values that aren't part of the
+// active roster on referenceDate (already graduated, or not yet joined as
+// of this date — a leader can deliberately invite either) sort after
+// everything with an active rank, most-recently-graduated first.
+export function sortDenValues(values, referenceDate) {
+  return [...values].sort((a, b) => {
+    const rankA = getDenInfo(a, referenceDate)?.rank ?? 99;
+    const rankB = getDenInfo(b, referenceDate)?.rank ?? 99;
+    return rankA - rankB || Number(b) - Number(a);
+  });
 }
 
 // The 6 currently-active kid-den keys (graduation-year strings) as of

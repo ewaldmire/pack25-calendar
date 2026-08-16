@@ -1,5 +1,5 @@
 import React from "react";
-import { getDenInfo, getEventDens, hasAllKidDens, LEADERS } from "@/lib/dens";
+import { getDenInfo, getEventDens, hasAllKidDens, sortDenValues, LEADERS } from "@/lib/dens";
 import { Pencil, Trash2, MapPin, Clock, Calendar } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { formatTimeRange } from "@/lib/timeFormat";
@@ -75,7 +75,7 @@ export default function EventList({ events, onEdit, onDelete, onEventClick, canE
           </thead>
           <tbody>
             {sorted.map(ev => {
-              const dens = getEventDens(ev);
+              const dens = sortDenValues(getEventDens(ev), ev.date);
               return (
                 <tr key={ev.id} className="border-b border-border print:break-inside-avoid align-top">
                   <td className="py-1 pr-2">{printDateRange(ev.date, ev.end_date)}</td>
@@ -104,7 +104,7 @@ export default function EventList({ events, onEdit, onDelete, onEventClick, canE
 
       <div className="space-y-3 print:hidden">
       {sorted.map(ev => {
-        const dens = getEventDens(ev);
+        const dens = sortDenValues(getEventDens(ev), ev.date);
         return (
           <div
             key={ev.id}
