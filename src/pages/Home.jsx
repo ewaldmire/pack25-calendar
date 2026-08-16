@@ -76,7 +76,11 @@ export default function Home() {
     const m = monthDate.getMonth();
     return filteredEvents.filter(ev => {
       if (!ev.date) return false;
-      const d = new Date(ev.date);
+      // new Date("yyyy-MM-dd") parses as UTC midnight, which in a
+      // timezone behind UTC (e.g. Central) rolls back to the previous
+      // day/month — parseISO treats it as local midnight instead, which
+      // is what a date-only string actually means here.
+      const d = parseISO(ev.date);
       return d.getFullYear() === y && d.getMonth() === m;
     });
   }, [filteredEvents, monthDate, view]);

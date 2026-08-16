@@ -1,4 +1,10 @@
-import { addDays, addWeeks, addMonths, differenceInCalendarDays, parseISO, eachDayOfInterval, isWithinInterval } from "date-fns";
+import { addDays, addWeeks, addMonths, differenceInCalendarDays, parseISO, eachDayOfInterval, isWithinInterval, format } from "date-fns";
+
+// toISOString() would convert to UTC before slicing the date — only
+// correct by coincidence west of UTC (e.g. Chicago), since local midnight
+// shifted forward stays on the same UTC calendar day. format() reads the
+// Date's local getters directly, which is correct regardless of offset.
+const toDateStr = (d) => format(d, "yyyy-MM-dd");
 
 const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th"];
@@ -49,7 +55,7 @@ export function generateRecurrenceDates(startDateStr, type, interval, endDateStr
     while (new Date(year, month, 1) <= end && guard < 500) {
       const occurrence = getNthWeekdayOfMonth(year, month, weekday, nth);
       if (occurrence && occurrence >= start && occurrence <= end) {
-        dates.push(occurrence.toISOString().slice(0, 10));
+        dates.push(toDateStr(occurrence));
       }
       month += interval;
       year += Math.floor(month / 12);
@@ -64,7 +70,7 @@ export function generateRecurrenceDates(startDateStr, type, interval, endDateStr
   let guard = 0;
 
   while (current <= end && guard < 500) {
-    dates.push(current.toISOString().slice(0, 10));
+    dates.push(toDateStr(current));
     current = type === "weekly" ? addWeeks(current, interval) : addMonths(current, interval);
     guard++;
   }
@@ -82,7 +88,7 @@ export function getEventDates(event) {
   if (!event.end_date) return [event.date.slice(0, 10)];
   const end = parseISO(event.end_date.slice(0, 10));
   if (end <= start) return [event.date.slice(0, 10)];
-  return eachDayOfInterval({ start, end }).map(d => d.toISOString().slice(0, 10));
+  return eachDayOfInterval({ start, end }).map(toDateStr);
 }
 
 /**

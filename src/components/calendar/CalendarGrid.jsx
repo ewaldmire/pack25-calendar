@@ -1,4 +1,5 @@
 import React from "react";
+import { format } from "date-fns";
 import { DEN_MAP, MULTI_DEN_STYLE, getEventDens } from "@/lib/dens";
 import { formatTime } from "@/lib/timeFormat";
 import { getEventDates } from "@/lib/recurring";
@@ -12,7 +13,10 @@ export default function CalendarGrid({ events, monthDate, onEventClick, onDayCli
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = new Date();
-  const todayStr = today.toISOString().slice(0, 10);
+  // toISOString() converts to UTC first, which rolls "today" over to
+  // tomorrow every evening once local time crosses into the next UTC day
+  // (e.g. ~7pm Central) — format() reads the Date's local getters instead.
+  const todayStr = format(today, "yyyy-MM-dd");
 
   const cells = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
