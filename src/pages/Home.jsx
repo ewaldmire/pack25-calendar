@@ -210,7 +210,11 @@ export default function Home() {
                 : `${formatListDate(listFrom)} – ${formatListDate(listTo)}`}
             </p>
           </div>
-          <img src={cubScoutsLogo} alt="Pack 25 Mahomet" className="w-12 h-12 object-contain" />
+          <div className="flex-1 text-right text-[10px] text-muted-foreground leading-relaxed pt-1">
+            <p>Printed {format(new Date(), "MMM d, yyyy 'at' h:mm a")}</p>
+            <p>For the current calendar, see https://www.pack25mahomet.com/</p>
+          </div>
+          <img src={cubScoutsLogo} alt="Pack 25 Mahomet" className="w-12 h-12 object-contain ml-4" />
         </div>
 
         {/* Controls */}
