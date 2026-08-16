@@ -1,9 +1,15 @@
 import React from "react";
-import { DENS } from "@/lib/dens";
+import { KID_DENS, DEN_MAP, hasAllKidDens } from "@/lib/dens";
 import { cn } from "@/lib/utils";
 
-export default function FilterBar({ selectedDens, onToggleDen, onClear, onAll }) {
-  const allSelected = selectedDens.length === 0;
+const LEADERS_DEN = DEN_MAP.leaders;
+
+export default function FilterBar({ selectedKidDens, onToggleDen, showLeaders, onToggleLeaders, onClear, onAll }) {
+  // "All Dens" reflects the 6 real kid dens only. Leaders is a fully
+  // separate visibility toggle for leaders-only events (see Home.jsx's
+  // filteredEvents) — it never factors into this, and its own button below
+  // lights purely off showLeaders, independent of kid-den selection.
+  const allSelected = selectedKidDens.length === 0 || hasAllKidDens(selectedKidDens);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -18,8 +24,19 @@ export default function FilterBar({ selectedDens, onToggleDen, onClear, onAll })
       >
         All Dens
       </button>
-      {DENS.map(d => {
-        const active = selectedDens.includes(d.value);
+      <button
+        onClick={onToggleLeaders}
+        className={cn(
+          "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all",
+          showLeaders ? "border-transparent" : "bg-background border-border hover:border-foreground/30"
+        )}
+        style={showLeaders ? { backgroundColor: LEADERS_DEN.bg, color: LEADERS_DEN.text, borderColor: LEADERS_DEN.color } : {}}
+      >
+        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: LEADERS_DEN.color }} />
+        Leaders
+      </button>
+      {KID_DENS.map(d => {
+        const active = allSelected || selectedKidDens.includes(d.value);
         return (
           <button
             key={d.value}
@@ -35,7 +52,7 @@ export default function FilterBar({ selectedDens, onToggleDen, onClear, onAll })
           </button>
         );
       })}
-      {selectedDens.length > 0 && (
+      {(selectedKidDens.length > 0 || !showLeaders) && (
         <button onClick={onClear} className="text-sm text-muted-foreground hover:text-foreground underline ml-1">
           Clear
         </button>

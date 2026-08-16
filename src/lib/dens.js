@@ -10,6 +10,11 @@ export const DENS = [
 
 export const DEN_MAP = Object.fromEntries(DENS.map(d => [d.value, d]));
 
+// Leaders isn't a den of kids — a real den meeting always has its leaders
+// there too. "All Dens" and its lit-up state always mean these 6, never
+// Leaders, regardless of whether it's also selected.
+export const KID_DENS = DENS.filter(d => d.value !== "leaders");
+
 // Cub Scouting's own blue-and-gold, used for events tied to more than one
 // den so the calendar isn't misleadingly colored as if it belonged to
 // whichever den happens to be first in the list.
@@ -18,7 +23,15 @@ export const MULTI_DEN_STYLE = {
   color: "#1E293B",
 };
 
-export function densForEvent(event) {
-  if (!event.dens || event.dens.length === 0) return [DEN_MAP.leaders];
-  return event.dens.map(d => DEN_MAP[d]).filter(Boolean);
+// An event with no dens saved is treated as Leaders-only everywhere in the
+// app — this is the one place that convention is defined.
+export function getEventDens(event) {
+  return event.dens && event.dens.length ? event.dens : ["leaders"];
+}
+
+// True when a den list (a saved event's dens, or the view screens'
+// selectedKidDens filter) covers all 6 kid dens. Used to decide whether
+// something should collapse to "All Dens" in the UI/print output.
+export function hasAllKidDens(dens) {
+  return KID_DENS.every(d => dens.includes(d.value));
 }

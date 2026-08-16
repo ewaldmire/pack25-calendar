@@ -19,6 +19,7 @@ import EventModal from "@/components/calendar/EventModal";
 import LoginDialog from "@/components/calendar/LoginDialog";
 import SubscribeDialog from "@/components/calendar/SubscribeDialog";
 import { cn } from "@/lib/utils";
+import { KID_DENS, getEventDens } from "@/lib/dens";
 import { generateRecurrenceDates } from "@/lib/recurring";
 import { useAuth } from "@/lib/AuthContext";
 import { DEMO_MODE } from "@/lib/demoMode";
@@ -27,7 +28,11 @@ export default function Home() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("list");
-  const [selectedDens, setSelectedDens] = useState([]);
+  const [selectedKidDens, setSelectedKidDens] = useState([]);
+  // Leaders isn't a den — it's a separate visibility toggle for
+  // leaders-only events, not another entry in the kid-den OR-filter
+  // (which would otherwise hide every kid-den event the moment it's on).
+  const [showLeaders, setShowLeaders] = useState(true);
   const [monthDate, setMonthDate] = useState(new Date());
   const [listFrom, setListFrom] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const [listTo, setListTo] = useState(() => format(addDays(new Date(), 90), "yyyy-MM-dd"));
@@ -56,9 +61,14 @@ export default function Home() {
   useEffect(() => { loadEvents(); }, [loadEvents]);
 
   const filteredEvents = useMemo(() => {
-    if (selectedDens.length === 0) return events;
-    return events.filter(ev => ev.dens && ev.dens.some(d => selectedDens.includes(d)));
-  }, [events, selectedDens]);
+    return events.filter(ev => {
+      const kidDens = getEventDens(ev).filter(d => d !== "leaders");
+      // Leaders-only events are governed entirely by the showLeaders
+      // toggle, independent of whatever kid dens are selected.
+      if (kidDens.length === 0) return showLeaders;
+      return selectedKidDens.length === 0 || kidDens.some(d => selectedKidDens.includes(d));
+    });
+  }, [events, selectedKidDens, showLeaders]);
 
   const monthEvents = useMemo(() => {
     if (view !== "calendar") return filteredEvents;
@@ -78,6 +88,19 @@ export default function Home() {
     });
   }, [filteredEvents, listFrom, listTo]);
 
+  // Explicit den list for the ICS subscribe link, mirroring whatever's
+  // currently being viewed. Default (nothing restricted) stays an empty
+  // array so the feed omits ?dens= entirely, same as before this toggle
+  // existed. Turning Leaders off with no kid-den restriction has to spell
+  // out all 6 kid dens explicitly — the feed has no other way to say
+  // "everything except Leaders".
+  const subscribeDens = useMemo(() => {
+    const noKidRestriction = selectedKidDens.length === 0;
+    if (noKidRestriction && showLeaders) return [];
+    const kidPart = noKidRestriction ? KID_DENS.map(d => d.value) : selectedKidDens;
+    return showLeaders ? [...kidPart, "leaders"] : kidPart;
+  }, [selectedKidDens, showLeaders]);
+
   // Native date inputs fire onChange with incomplete values while the user
   // is still typing (e.g. after only the month digits), so this must
   // tolerate anything short of a full yyyy-MM-dd string instead of crashing
@@ -86,7 +109,7 @@ export default function Home() {
     /^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? format(parseISO(dateStr), "MMM d, yyyy") : dateStr;
 
   const toggleDen = (den) => {
-    setSelectedDens(prev => prev.includes(den) ? prev.filter(d => d !== den) : [...prev, den]);
+    setSelectedKidDens(prev => prev.includes(den) ? prev.filter(d => d !== den) : [...prev, den]);
   };
 
   const handleSave = async (form) => {
@@ -188,11 +211,16 @@ export default function Home() {
 
         {/* Controls */}
         <div className="flex flex-col gap-4 print:hidden">
+          {/* "All Dens" only resets the kid-den selection — Leaders is a
+              separate axis and must be untouched by it. "Clear" is the
+              full reset back to the true default (both axes). */}
           <FilterBar
-            selectedDens={selectedDens}
+            selectedKidDens={selectedKidDens}
             onToggleDen={toggleDen}
-            onAll={() => setSelectedDens([])}
-            onClear={() => setSelectedDens([])}
+            showLeaders={showLeaders}
+            onToggleLeaders={() => setShowLeaders(s => !s)}
+            onAll={() => setSelectedKidDens([])}
+            onClear={() => { setSelectedKidDens([]); setShowLeaders(true); }}
           />
           <div className="flex flex-wrap items-center justify-between gap-3">
             {view === "calendar" ? (
@@ -273,7 +301,7 @@ export default function Home() {
 
       <EventForm open={formOpen} onOpenChange={(o) => { setFormOpen(o); if (!o) setEditingEvent(null); }} onSave={handleSave} editingEvent={editingEvent} />
       <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
-      <SubscribeDialog open={subscribeOpen} onOpenChange={setSubscribeOpen} selectedDens={selectedDens} />
+      <SubscribeDialog open={subscribeOpen} onOpenChange={setSubscribeOpen} selectedDens={subscribeDens} />
       <EventModal event={modalEvent} onOpenChange={setModalEvent} onEdit={handleEdit} onDelete={setDeleteTarget} canEdit={isAuthenticated} />
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <AlertDialogContent>
