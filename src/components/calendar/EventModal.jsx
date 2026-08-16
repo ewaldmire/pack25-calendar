@@ -3,7 +3,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { DEN_MAP, getEventDens } from "@/lib/dens";
+import { getDenInfo, getEventDens } from "@/lib/dens";
 import { Calendar, Clock, MapPin, Pencil, Trash2 } from "lucide-react";
 import { formatTimeRange } from "@/lib/timeFormat";
 import { formatDateRange } from "@/lib/recurring";
@@ -21,7 +21,7 @@ export default function EventModal({ event, onOpenChange, onEdit, onDelete, canE
         <div className="space-y-3">
           <div className="flex flex-wrap gap-1.5">
             {dens.map(d => {
-              const info = DEN_MAP[d];
+              const info = getDenInfo(d, event.date);
               if (!info) return null;
               return (
                 <span key={d} className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: info.bg, color: info.text }}>

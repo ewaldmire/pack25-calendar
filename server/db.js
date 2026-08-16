@@ -1,5 +1,4 @@
 import pg from "pg";
-import { DENS } from "../src/lib/dens.js";
 
 const { Pool, types } = pg;
 
@@ -11,10 +10,12 @@ export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-const validDens = DENS.map((d) => d.value);
-const densLiteral = `ARRAY[${validDens.map((d) => `'${d}'`).join(", ")}]::text[]`;
-
 export async function initDb() {
+  // No CHECK constraint on `dens` — Zod (server/events.js) is already the
+  // only gate on the only two write paths, and a per-element regex CHECK
+  // would need a subquery over unnest(), which Postgres disallows in CHECK
+  // expressions outright. Dens are graduation-year strings (or "leaders"),
+  // an open-ended set that grows every year — see src/lib/dens.js.
   await pool.query(`
     CREATE TABLE IF NOT EXISTS events (
       id UUID PRIMARY KEY,
@@ -25,7 +26,7 @@ export async function initDb() {
       end_time TEXT,
       location TEXT,
       details TEXT,
-      dens TEXT[] NOT NULL DEFAULT '{}' CHECK (dens <@ ${densLiteral}),
+      dens TEXT[] NOT NULL DEFAULT '{}',
       sequence INT NOT NULL DEFAULT 0,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT now()

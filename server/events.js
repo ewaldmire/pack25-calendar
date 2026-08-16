@@ -2,9 +2,7 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { pool } from "./db.js";
 import { requireAuth } from "./auth.js";
-import { DENS } from "../src/lib/dens.js";
-
-const validDens = DENS.map((d) => d.value);
+import { isValidDenValue } from "../src/lib/dens.js";
 
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD");
 const optionalDateString = z.union([dateString, z.literal("")]).optional().default("");
@@ -18,7 +16,7 @@ const eventSchema = z.object({
   end_time: optionalText,
   location: optionalText,
   details: optionalText,
-  dens: z.array(z.enum(validDens))
+  dens: z.array(z.string().refine(isValidDenValue, "Invalid den"))
     .min(1, "Select at least one den")
     .refine((dens) => !(dens.includes("leaders") && dens.length > 1), {
       message: "Leaders cannot be combined with other dens",
