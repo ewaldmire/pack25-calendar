@@ -89,7 +89,10 @@ To verify a backup actually restores cleanly, run the real published image again
 throwaway local Postgres — no source checkout or build required, just Docker Hub:
 
 ```bash
+#NOTE: Run this in the git repo so the node/bcryptjs command will work
+
 podman run --name pack25-test-pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16-alpine
+sleep 5 #to give postgres a moment to start
 
 LEADER_HASH=$(node -e "console.log(require('bcryptjs').hashSync(process.argv[1], 10))" 'testpass123')
 
