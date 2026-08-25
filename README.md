@@ -8,9 +8,8 @@ There are two ways this app runs:
 
 - **Self-hosted** — a single Node/Express server that serves the built frontend and a
   REST API backed by Postgres. This is the real deployment target.
-- **Static demo** (`VITE_DEMO_MODE=true`) — no backend at all; data lives in the
-  browser's `localStorage`. This is what's deployed to GitHub Pages
-  (`.github/workflows/deploy-pages.yml`) as a public, no-login preview.
+- **Static demo** (`VITE_DEMO_MODE=true`) — no backend at all; data lives in the  browser's `localStorage`. This is what's deployed to GitHub Pages
+  (`.github/workflows/deploy-pages.yml`) as a public, no-login preview at [https://ewaldmire.github.io/pack25-calendar/](https://ewaldmire.github.io/pack25-calendar/)
 
 ## Local development (frontend only, against demo data)
 
@@ -106,11 +105,6 @@ podman run --name pack25-test-app --network host \
 Open `http://localhost:3000` — it should load with an empty calendar (leader password
 is `testpass123`). Continue with the restore steps below to load a backup into it.
 
-Tear it down when you're done:
-
-```bash
-podman rm -f pack25-test-app pack25-test-pg
-```
 
 ### Restoring from a backup
 
@@ -141,6 +135,14 @@ curl -b cookies.txt -X POST "$TARGET_URL/api/events/bulk" \
 `id` field in the backup file. That's fine for restoring into an empty database, but
 running it against a database that already has data will create duplicates rather than
 overwrite anything.
+
+### Clean up Test Restore environment
+
+Tear it down when you're done:
+
+```bash
+podman rm -f pack25-test-app pack25-test-pg
+```
 
 ## Building the container image
 
@@ -193,5 +195,3 @@ GitHub source. In that app's settings, turn on **"Include prereleases"** —
 the `dev` release is marked as a prerelease on purpose, so Obtainium won't
 see it otherwise. From then on, Obtainium will offer a reinstall whenever a
 new dev build lands (each one carries a newer, datetime-derived version).
-
-If your laptop's IP changes, update `server_url` and push again to rebuild.
