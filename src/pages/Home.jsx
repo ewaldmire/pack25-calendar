@@ -18,6 +18,7 @@ import FilterBar from "@/components/calendar/FilterBar";
 import EventModal from "@/components/calendar/EventModal";
 import LoginDialog from "@/components/calendar/LoginDialog";
 import SubscribeDialog from "@/components/calendar/SubscribeDialog";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { getEventDens } from "@/lib/dens";
 import { generateRecurrenceDates } from "@/lib/recurring";
@@ -220,20 +221,23 @@ export default function Home() {
         </div>
 
         {/* Controls */}
-        <div className="flex flex-col gap-4 print:hidden">
+        <div className="flex flex-col gap-4 print:hidden rounded-xl border border-border bg-muted p-3 sm:p-4">
           {/* "All Dens" only resets the kid-den selection — Leaders is a
               separate axis and must be untouched by it. "Clear" is the
               full reset back to the true default (both axes). */}
-          <FilterBar
-            selectedKidDens={selectedKidDens}
-            onToggleDen={toggleDen}
-            showLeaders={showLeaders}
-            onToggleLeaders={() => setShowLeaders(s => !s)}
-            onAll={() => setSelectedKidDens([])}
-            onClear={() => { setSelectedKidDens([]); setShowLeaders(true); }}
-            rangeStart={view === "calendar" ? format(startOfMonth(monthDate), "yyyy-MM-dd") : listFrom}
-            rangeEnd={view === "calendar" ? format(endOfMonth(monthDate), "yyyy-MM-dd") : listTo}
-          />
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-muted-foreground">Dens (select/un-select which ones you want to see)</Label>
+            <FilterBar
+              selectedKidDens={selectedKidDens}
+              onToggleDen={toggleDen}
+              showLeaders={showLeaders}
+              onToggleLeaders={() => setShowLeaders(s => !s)}
+              onAll={() => setSelectedKidDens([])}
+              onClear={() => { setSelectedKidDens([]); setShowLeaders(true); }}
+              rangeStart={view === "calendar" ? format(startOfMonth(monthDate), "yyyy-MM-dd") : listFrom}
+              rangeEnd={view === "calendar" ? format(endOfMonth(monthDate), "yyyy-MM-dd") : listTo}
+            />
+          </div>
           <div className="flex flex-wrap items-center justify-between gap-3">
             {view === "calendar" ? (
               <div className="flex items-center gap-2">
@@ -244,40 +248,43 @@ export default function Home() {
                 <Button variant="ghost" size="icon" onClick={() => setMonthDate(new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 1))}>
                   <ChevronRight className="w-5 h-5" />
                 </Button>
-                <Button variant="outline" size="sm" className="ml-1" onClick={() => setMonthDate(new Date())}>Today</Button>
+                <Button variant="outline" size="sm" className="ml-1 bg-background" onClick={() => setMonthDate(new Date())}>Today</Button>
               </div>
             ) : (
-              <div className="flex flex-wrap items-center gap-2 print:hidden">
-                <Input
-                  type="date"
-                  value={listFrom}
-                  max={listTo}
-                  onChange={e => setListFrom(e.target.value)}
-                  className="w-auto"
-                  aria-label="From date"
-                />
-                <span className="text-muted-foreground text-sm">to</span>
-                <Input
-                  type="date"
-                  value={listTo}
-                  min={listFrom}
-                  onChange={e => setListTo(e.target.value)}
-                  className="w-auto"
-                  aria-label="To date"
-                />
+              <div className="flex flex-col gap-1.5 print:hidden">
+                <Label className="text-muted-foreground">Date Range (default shows next 90 days)</Label>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Input
+                    type="date"
+                    value={listFrom}
+                    max={listTo}
+                    onChange={e => setListFrom(e.target.value)}
+                    className="w-auto bg-background"
+                    aria-label="From date"
+                  />
+                  <span className="text-muted-foreground text-sm">to</span>
+                  <Input
+                    type="date"
+                    value={listTo}
+                    min={listFrom}
+                    onChange={e => setListTo(e.target.value)}
+                    className="w-auto bg-background"
+                    aria-label="To date"
+                  />
+                </div>
               </div>
             )}
             <div className="flex items-center gap-2">
               <div className="flex rounded-lg border border-border overflow-hidden">
                 <button
                   onClick={() => setView("list")}
-                  className={cn("flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors", view === "list" ? "bg-foreground text-background" : "hover:bg-accent")}
+                  className={cn("flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors", view === "list" ? "bg-foreground text-background" : "bg-background hover:bg-accent")}
                 >
                   <List className="w-4 h-4" /> List
                 </button>
                 <button
                   onClick={() => setView("calendar")}
-                  className={cn("flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-l border-border", view === "calendar" ? "bg-foreground text-background" : "hover:bg-accent")}
+                  className={cn("flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-l border-border", view === "calendar" ? "bg-foreground text-background" : "bg-background hover:bg-accent")}
                 >
                   <CalendarIcon className="w-4 h-4" /> Calendar
                 </button>
