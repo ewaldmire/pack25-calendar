@@ -226,7 +226,9 @@ export default function Home() {
               separate axis and must be untouched by it. "Clear" is the
               full reset back to the true default (both axes). */}
           <div className="flex flex-col gap-1.5">
-            <Label className="text-muted-foreground">Dens (select/un-select which ones you want to see)</Label>
+	    <Label className="text-muted-foreground">
+              <span className="font-semibold text-foreground">Dens</span> - toggle on/off to display events
+            </Label>
             <FilterBar
               selectedKidDens={selectedKidDens}
               onToggleDen={toggleDen}
@@ -252,7 +254,9 @@ export default function Home() {
               </div>
             ) : (
               <div className="flex flex-col gap-1.5 print:hidden">
-                <Label className="text-muted-foreground">Date Range (default shows next 90 days)</Label>
+                <Label className="text-muted-foreground">
+                  <span className="font-semibold text-foreground">Date Range</span> - default shows next 90 days
+                </Label>
                 <div className="flex flex-wrap items-center gap-2">
                   <Input
                     type="date"
