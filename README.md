@@ -43,8 +43,7 @@ cp .env.example .env
 
 npm install
 npm run build          # builds the frontend into dist/
-export $(cat .env | xargs)
-npm run start:server   # serves dist/ + the API on $PORT (default 3000)
+env $(grep -v '^#' .env | xargs) NODE_ENV=production npm run start:server   # serves dist/ + the API on $PORT (default 3000)
 ```
 
 Open `http://localhost:3000`.
