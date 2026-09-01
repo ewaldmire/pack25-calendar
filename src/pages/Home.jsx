@@ -165,14 +165,14 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-30 bg-primary print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
+          <a href="https://www.pack25mahomet.com/" className="flex items-center gap-2.5">
             <img
               src={cubScoutsLogo}
               alt="Pack 25 Mahomet"
               className="w-9 h-9 rounded-lg object-contain shadow-sm"
             />
             <h1 className="font-bold text-base sm:text-lg leading-tight text-primary-foreground">Pack 25 Mahomet</h1>
-          </div>
+          </a>
           <div className="flex items-center gap-2">
             {!DEMO_MODE && !isAuthenticated && (
               <Button variant="outline" size="sm" onClick={() => setSubscribeOpen(true)} className="border-white/40 bg-transparent text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
